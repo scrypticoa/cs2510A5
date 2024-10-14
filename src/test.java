@@ -97,10 +97,58 @@ class ConsLoColor implements ILoColor {
 
 class Result{
   int exact;
-  int inexact;
+  ILoInt answer;
+  ILoInt guess;
   
-  Result(int exact, int inexact){
+  Result(int exact,  ILoInt answer, ILoInt guess){
     this.exact = exact;
-    this.inexact = inexact;
+    this.answer = answer;
+    this.guess = guess;
   }
 }
+
+interface ILoInt{
+  ILoInt addAtPos();
+}
+
+class MtLoInt implements ILoInt{
+
+  @Override
+  public ILoInt addAtPos() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+ 
+}
+
+class ConsLoInt implements ILoInt{
+  int first;
+  ILoInt rest;
+  
+  ConsLoInt(int first, ILoInt rest){
+    this.first = first;
+    this.rest = rest;
+  }
+  
+  ConsLoInt(int x){
+    first = 0;
+    if(x > 1) {
+      rest =  new ConsLoInt(x-1);
+    } else {
+      rest = new MtLoInt();
+    }
+  }
+
+  @Override
+  public ILoInt addAtPos() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+}
+
+
+
+
+
+
+
