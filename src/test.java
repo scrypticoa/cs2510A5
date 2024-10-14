@@ -1,5 +1,8 @@
-//import javalib.funworld.*;
-import java.awt.*;
+import tester.*;
+import java.util.Random;
+import javalib.worldimages.*;
+import javalib.funworld.*;
+import java.awt.Color;
 
 interface ILoColor {
 
@@ -19,8 +22,9 @@ class ConsLoColor implements ILoColor {
   }
 }
 
-class Game {
-  ILoInt guess;
+class Game extends World {
+  Result compareResult;
+  
   int numColors;
   
   // constructor settings
@@ -39,14 +43,17 @@ class Game {
     guess = new MtLoInt();
   }
   
+  public WorldScene makeScene() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+  
   public Result genBlankResult() {
     return new Result(
         0,
         new ConsLoInt(numColors),
         new ConsLoInt(numColors));
-  }
-  
-  
+  }  
 }
 
 class Result {
