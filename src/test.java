@@ -44,6 +44,8 @@ class Game {
         new ConsLoInt(numColors),
         new ConsLoInt(numColors));
   }
+  
+  
 }
 
 class Result {
@@ -83,6 +85,21 @@ interface ILoInt{
 }
 
 class MtLoInt implements ILoInt{
+  /*TEMPLATE:
+   * METHODS:
+   * addAtPos(int pos) ... ILoInt
+   * insert(int num) ... ILoInt
+   * remove() ... ILoInt
+   * clone() ... ILoInt
+   * compare(ILoInt other, Game game) ... Result
+   * comparePass(ILoInt other, Game game, Result result) ... Result
+   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * sum() ... int
+   * mins(ILoInt list) ... ILoInt
+   * minsCompare(int otherFirst) ... int
+   * minsRHelp(ILoInt list) ... ILoint
+   */
+  
   public ILoInt addAtPos(int pos) {
     return new MtLoInt();
   }
@@ -148,6 +165,36 @@ class ConsLoInt implements ILoInt{
     }
   }
   
+  /*TEMPLATE:
+   * FIELDS:
+   * this.first ... int
+   * this.rest ... ILoInt
+   * METHODS:
+   * addAtPos(int pos) ... ILoInt
+   * insert(int num) ... ILoInt
+   * remove() ... ILoInt
+   * clone() ... ILoInt
+   * compare(ILoInt other, Game game) ... Result
+   * comparePass(ILoInt other, Game game, Result result) ... Result
+   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * sum() ... int
+   * mins(ILoInt list) ... ILoInt
+   * minsCompare(int otherFirst) ... int
+   * minsRHelp(ILoInt list) ... ILoint
+   * METHODS OF FIELDS
+   * rest.addAtPos(int pos) ... ILoInt
+   * rest.insert(int num) ... ILoInt
+   * rest.remove() ... ILoInt
+   * rest.clone() ... ILoInt
+   * rest.compare(ILoInt other, Game game) ... Result
+   * rest.comparePass(ILoInt other, Game game, Result result) ... Result
+   * rest.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * rest.sum() ... int
+   * rest.mins(ILoInt list) ... ILoInt
+   * rest.minsCompare(int otherFirst) ... int
+   * rest.minsRHelp(ILoInt list) ... ILoint
+   */
+  
   public ILoInt addAtPos(int pos) {
     if(pos == 0){
       return new ConsLoInt(this.first + 1, this.rest);
@@ -178,6 +225,7 @@ class ConsLoInt implements ILoInt{
   
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     return other.comparePass(this.rest, game, result);
+  }
 
   public int sum() {
     return first + rest.sum();
@@ -195,10 +243,3 @@ class ConsLoInt implements ILoInt{
     return list.mins(this.rest);
   }
 }
-
-
-
-
-
-
-
