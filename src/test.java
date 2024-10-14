@@ -20,8 +20,7 @@ class ConsLoColor implements ILoColor {
 }
 
 class Game {
-  Result compareResult;
-  
+  ILoInt guess;
   int numColors;
   
   // constructor settings
@@ -36,6 +35,8 @@ class Game {
     this.sequenceLength = sequenceLength;
     this.attemptCount = attemptCount;
     this.duplicatesAllowed = duplicatesAllowed;
+    
+    guess = new MtLoInt();
   }
   
   public Result genBlankResult() {
