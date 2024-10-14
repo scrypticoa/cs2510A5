@@ -66,3 +66,13 @@ class ConsLoColor implements ILoColor {
     return rest.doReverse(new ConsLoColor(first, result));
   }
 }
+
+class Result{
+  int exact;
+  int inexact;
+  
+  Result(int exact, int inexact){
+    this.exact = exact;
+    this.inexact = inexact;
+  }
+}
