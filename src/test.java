@@ -2,55 +2,11 @@
 import java.awt.*;
 
 interface ILoColor {
-  ILoColor insert(Color color);
-  
-  ILoColor remove();
-  
-  ILoColor clone();
-  
-  ILoColor reverse();
-  ILoColor doReverse(ILoColor result);
-  
-  Result compare(ILoColor other);
-  Result comparePass(ILoColor other, Result result);
-  Result doCompare(ILoColor other, Result result, Color color);
+
 }
 
 class MtLoColor implements ILoColor {
   
-  public ILoColor insert(Color color) {
-    return new ConsLoColor(color, new MtLoColor());
-  }
-  
-  public ILoColor remove() {
-    return new MtLoColor();
-  }
-  
-  public ILoColor clone() {
-    return new MtLoColor();
-  }
-  
-  public ILoColor reverse() {
-    return new MtLoColor();
-  }
-  
-  public ILoColor doReverse(ILoColor result) {
-    return result;
-  }
-  
-  public Result compare(ILoColor other) {
-    return new Result(0, 0);
-    // error
-  }
-  
-  public Result comparePass(ILoColor other, Result result) {
-    return result;
-  }
-  
-  public Result doCompare(ILoColor other, Result result, Color color) {
-    return new Result(0, 0);
-    // error
-  }
 }
 
 class ConsLoColor implements ILoColor {
@@ -61,41 +17,36 @@ class ConsLoColor implements ILoColor {
     this.first = first;
     this.rest = rest;
   }
+}
+
+class Game {
+  Result compareResult;
   
-  public ILoColor insert(Color color) {
-    return new ConsLoColor(color, this.clone());
+  int numColors;
+  
+  // constructor settings
+  ILoColor gameColors;
+  int sequenceLength;
+  int attemptCount;
+  boolean duplicatesAllowed;
+  
+  public Game(ILoColor gameColors, int sequenceLength,
+      int attemptCount, boolean duplicatesAllowed) {
+    this.gameColors = gameColors;
+    this.sequenceLength = sequenceLength;
+    this.attemptCount = attemptCount;
+    this.duplicatesAllowed = duplicatesAllowed;
   }
   
-  public ILoColor remove() {
-    return this.rest;
-  }
-  
-  public ILoColor clone() {
-    return new ConsLoColor(this.first, this.rest.clone());
-  }
-  
-  public ILoColor reverse() {
-    return this.doReverse(new MtLoColor());
-  }
-  
-  public ILoColor doReverse(ILoColor result) {
-    return rest.doReverse(new ConsLoColor(first, result));
-  }
-  
-  public Result compare(ILoColor other) {
-    return this.comparePass(other, new Result(0, 0));
-  }
-  
-  public Result comparePass(ILoColor other, Result result) {
-    return other.doCompare(this.rest, result, this.first);
-  }
-  
-  public Result doCompare(ILoColor other, Result result, Color color) {
-    return other.comparePass(this.rest, result);
+  public Result genBlankResult() {
+    return new Result(
+        0,
+        new ConsLoInt(numColors),
+        new ConsLoInt(numColors));
   }
 }
 
-class Result{
+class Result {
   int exact;
   ILoInt answer;
   ILoInt guess;
@@ -109,11 +60,47 @@ class Result{
 
 interface ILoInt{
   ILoInt addAtPos(int pos);
+  
+  ILoInt insert(int num);
+  
+  ILoInt remove();
+  
+  ILoInt clone();
+  
+  Result compare(ILoInt other, Game game);
+  Result comparePass(ILoInt other, Game game, Result result);
+  Result doCompare(ILoInt other, Game game, Result result, int num);
 }
 
 class MtLoInt implements ILoInt{
   public ILoInt addAtPos(int pos) {
     return new MtLoInt();
+  }
+  
+  public ILoInt insert(int num) {
+    return new ConsLoInt(num, new MtLoInt());
+  }
+  
+  public ILoInt remove() {
+    return new MtLoInt();
+  }
+  
+  public ILoInt clone() {
+    return new MtLoInt();
+  }
+  
+  public Result compare(ILoInt other, Game game) {
+    return game.genBlankResult();
+    // error
+  }
+  
+  public Result comparePass(ILoInt other, Game game, Result result) {
+    return result;
+  }
+  
+  public Result doCompare(ILoInt other, Game game, Result result, int num) {
+    return game.genBlankResult();
+    // error
   }
 }
 
@@ -134,12 +121,37 @@ class ConsLoInt implements ILoInt{
       rest = new MtLoInt();
     }
   }
-
+  
   public ILoInt addAtPos(int pos) {
     if(pos == 0){
       return new ConsLoInt(this.first + 1, this.rest);
     }
     return new ConsLoInt(this.first, this.rest.addAtPos(pos-1));
+  }
+  
+  public ILoInt insert(int num) {
+    return new ConsLoInt(num, this.clone());
+  }
+  
+  public ILoInt remove() {
+    return this.rest;
+  }
+  
+  public ILoInt clone() {
+    return new ConsLoInt(this.first, this.rest.clone());
+  }
+  
+  public Result compare(ILoInt other, Game game) {
+    Result result = game.genBlankResult();
+    return this.comparePass(other, game, result);
+  }
+  
+  public Result comparePass(ILoInt other, Game game, Result result) {
+    return other.doCompare(this.rest, game, result, this.first);
+  }
+  
+  public Result doCompare(ILoInt other, Game game, Result result, int num) {
+    return other.comparePass(this.rest, game, result);
   }
 }
 
