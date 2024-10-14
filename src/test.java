@@ -108,17 +108,13 @@ class Result{
 }
 
 interface ILoInt{
-  ILoInt addAtPos();
+  ILoInt addAtPos(int pos);
 }
 
 class MtLoInt implements ILoInt{
-
-  @Override
-  public ILoInt addAtPos() {
-    // TODO Auto-generated method stub
-    return null;
+  public ILoInt addAtPos(int pos) {
+    return new MtLoInt();
   }
- 
 }
 
 class ConsLoInt implements ILoInt{
@@ -139,10 +135,11 @@ class ConsLoInt implements ILoInt{
     }
   }
 
-  @Override
-  public ILoInt addAtPos() {
-    // TODO Auto-generated method stub
-    return null;
+  public ILoInt addAtPos(int pos) {
+    if(pos == 0){
+      return new ConsLoInt(this.first + 1, this.rest);
+    }
+    return new ConsLoInt(this.first, this.rest.addAtPos(pos-1));
   }
 }
 
