@@ -8,5 +8,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/Users/scryp/Desktop/cs2510/EclipseJars/javalib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/scryp/Desktop/cs2510/EclipseJars/tester.jar"/>
+	<classpathentry kind="lib" path="/Users/jackspn/Documents/NU Year 2/cs2510/EclipseJars/javalib.jar"/>
+	<classpathentry kind="lib" path="/Users/jackspn/Documents/NU Year 2/cs2510/EclipseJars/tester.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
