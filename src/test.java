@@ -10,6 +10,8 @@ interface ILoColor {
   
   ILoColor reverse();
   ILoColor doReverse(ILoColor result);
+  
+  Result compare(ILoColor other);
 }
 
 class MtLoColor implements ILoColor {
