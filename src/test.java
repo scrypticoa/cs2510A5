@@ -12,6 +12,8 @@ interface ILoColor {
   ILoColor doReverse(ILoColor result);
   
   Result compare(ILoColor other);
+  Result comparePass(ILoColor other, Result result);
+  Result doCompare(ILoColor other, Result result, Color color);
 }
 
 class MtLoColor implements ILoColor {
@@ -34,6 +36,20 @@ class MtLoColor implements ILoColor {
   
   public ILoColor doReverse(ILoColor result) {
     return result;
+  }
+  
+  public Result compare(ILoColor other) {
+    return new Result(0, 0);
+    // error
+  }
+  
+  public Result comparePass(ILoColor other, Result result) {
+    return result;
+  }
+  
+  public Result doCompare(ILoColor other, Result result, Color color) {
+    return new Result(0, 0);
+    // error
   }
 }
 
@@ -64,6 +80,18 @@ class ConsLoColor implements ILoColor {
   
   public ILoColor doReverse(ILoColor result) {
     return rest.doReverse(new ConsLoColor(first, result));
+  }
+  
+  public Result compare(ILoColor other) {
+    return this.comparePass(other, new Result(0, 0));
+  }
+  
+  public Result comparePass(ILoColor other, Result result) {
+    return other.doCompare(this.rest, result, this.first);
+  }
+  
+  public Result doCompare(ILoColor other, Result result, Color color) {
+    return other.comparePass(this.rest, result);
   }
 }
 
