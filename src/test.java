@@ -59,6 +59,7 @@ class Result {
 }
 
 interface ILoInt{
+  //add 1 to the int at position pos
   ILoInt addAtPos(int pos);
   
   ILoInt insert(int num);
@@ -70,6 +71,15 @@ interface ILoInt{
   Result compare(ILoInt other, Game game);
   Result comparePass(ILoInt other, Game game, Result result);
   Result doCompare(ILoInt other, Game game, Result result, int num);
+  //finds sum of list
+  int sum();
+  
+  //takes in another list and compares each int 
+  ILoInt mins(ILoInt list);
+  // helper to get min at same pos in 2 lists
+  int minsCompare(int otherFirst);
+  // helper that gets the rest for the next comparison
+  ILoInt minsRHelp(ILoInt list);
 }
 
 class MtLoInt implements ILoInt{
@@ -101,6 +111,22 @@ class MtLoInt implements ILoInt{
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     return game.genBlankResult();
     // error
+  }
+
+  public int sum() {
+    return 0;
+  }
+  
+  public ILoInt mins(ILoInt list) {
+    return new MtLoInt();
+  }
+
+  public int minsCompare(int otherFirst) {
+    return otherFirst;
+  }
+
+  public ILoInt minsRHelp(ILoInt list) {
+    return new MtLoInt();
   }
 }
 
@@ -152,6 +178,21 @@ class ConsLoInt implements ILoInt{
   
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     return other.comparePass(this.rest, game, result);
+
+  public int sum() {
+    return first + rest.sum();
+  }
+  
+  public ILoInt mins(ILoInt list) {
+    return new ConsLoInt(list.minsCompare(this.first), list.minsRHelp(rest));
+  }
+
+  public int minsCompare(int otherFirst) {
+    return Math.min(this.first, otherFirst);
+  }
+
+  public ILoInt minsRHelp(ILoInt list) {
+    return list.mins(this.rest);
   }
 }
 
