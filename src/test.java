@@ -48,13 +48,33 @@ class Game {
 
 class Result {
   int exact;
-  ILoInt answer;
-  ILoInt guess;
+  ILoInt inexactCount1;
+  ILoInt inexactCount2;
   
-  Result(int exact,  ILoInt answer, ILoInt guess){
+  Result(int exact,  ILoInt inexactCount1, ILoInt inexactCount2){
     this.exact = exact;
-    this.answer = answer;
-    this.guess = guess;
+    this.inexactCount1 = inexactCount1;
+    this.inexactCount2 = inexactCount2;
+  }
+  
+  public int addExact() {
+    exact++;
+    return exact;
+  }
+  
+  public ILoInt addInexact1(int pos) {
+    this.inexactCount1 = this.inexactCount1.addAtPos(pos);
+    return this.inexactCount1;
+  }
+  
+  public ILoInt addInexact2(int pos) {
+    this.inexactCount2 = this.inexactCount2.addAtPos(pos);
+    return this.inexactCount2;
+  }
+  
+  public int calcInexactCount() {
+    ILoInt mins = inexactCount1.mins(inexactCount2);
+    return mins.sum();
   }
 }
 
@@ -177,7 +197,15 @@ class ConsLoInt implements ILoInt{
   }
   
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
+    if (num == this.first) {
+      result.addExact();
+    } else {
+      result.addInexact1(num);
+      result.addInexact2(this.first);
+    }
+    
     return other.comparePass(this.rest, game, result);
+  }
 
   public int sum() {
     return first + rest.sum();
