@@ -49,42 +49,14 @@ class Game extends World {
   }
   
   public Game onKeyEvent(String key) {
-    if (key.equals("1")) {
-    return this;
+    String nums = "123456789";
+    if (nums.contains(key)) {
+    } else if (key.equals("delete" )) {
+      
+    } else if (key.equals("enter")) {
+      
     }
-    else if (key.equals("2")) {
       return this;
-      }
-    else if (key.equals("3")) {
-      return this;
-      }
-    else if (key.equals("4")) {
-      return this;
-      }
-    else if (key.equals("5")) {
-      return this;
-      }
-    else if (key.equals("6")) {
-      return this;
-      }
-    else if (key.equals("7")) {
-      return this;
-      }
-    else if (key.equals("8")) {
-      return this;
-      }
-    else if (key.equals("9")) {
-      return this;
-      }
-    else if (key.equals("delete")) {
-      return this;
-      }
-    else if (key.equals("enter")) {
-      return this;
-      }
-    else {
-    return this;
-    }
   }
   
   public Result genBlankResult() {
