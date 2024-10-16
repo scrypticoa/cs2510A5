@@ -1,16 +1,27 @@
 import tester.*;
 import java.util.Random;
+import java.util.function.*;
 import javalib.worldimages.*;
 import javalib.funworld.*;
 import java.awt.Color;
 
 interface ILoColor {
   int calcLength();
+  Color get(int index);
+  <T> T fold(T initial, BiFunction<T, Color, T> folder);
 }
 
 class MtLoColor implements ILoColor {
   public int calcLength() {
     return 0;
+  }
+  
+  public Color get(int index) {
+    throw new IndexOutOfBoundsException();
+  }
+  
+  public <T> T fold(T initial, BiFunction<T, Color, T> folder) {
+    return initial;
   }
 }
 
@@ -34,27 +45,43 @@ class ConsLoColor implements ILoColor {
   public int calcLength() {
     return 1 + this.rest.calcLength();
   }
+  
+  public Color get(int index) {
+    if (index == 0) {
+      return this.first;
+    }
+    return this.rest.get(index-1);
+  }
+  
+  public <T> T fold(T initial, BiFunction<T, Color, T> folder) {
+    return this.rest.fold(
+        folder.apply(initial, this.first), 
+        folder);
+  }
 }
 
 class Game extends World {
+  GameArt art;
+  
   ILoInt sequence;
   
   ILoInt guess;
   int guessLength;
+  int numGuesses = 0;
   
   int numColors;
   
   // constructor settings
   ILoColor gameColors;
   int sequenceLength;
-  int attemptCount;
+  int maxGuesses;
   boolean duplicatesAllowed;
   
   public Game(ILoColor gameColors, int sequenceLength,
       int attemptCount, boolean duplicatesAllowed) {
     this.gameColors = gameColors;
     this.sequenceLength = sequenceLength;
-    this.attemptCount = attemptCount;
+    this.maxGuesses = attemptCount;
     this.duplicatesAllowed = duplicatesAllowed;
     
     this.numColors = gameColors.calcLength();
@@ -67,7 +94,7 @@ class Game extends World {
   
   private void validate() {
     if (this.sequenceLength < 1) throw new IllegalArgumentException();
-    if (this.attemptCount < 1) throw new IllegalArgumentException();
+    if (this.maxGuesses < 1) throw new IllegalArgumentException();
     if (this.numColors < 1) throw new IllegalArgumentException();
     if (!this.duplicatesAllowed && this.sequenceLength > this.numColors)
       throw new IllegalArgumentException();
@@ -119,13 +146,88 @@ class Game extends World {
   }
   
   class GameArt {
-    int dotSqaureSide = 10;
+    ILoColor colors;
+    
+    int maxGuesses;
+    int numGuesses = 0;
+    
+    WorldImage availableColors;
+    WorldImage guessSlots;
+    WorldImage correctSequence;
+    WorldImage hiddenSequence;
+    
+    int dotSquareSide = 10;
     int dotRadiusGap = 2;
     Color bgColor = new Color(150, 0, 0);
     Color outlineColor = Color.black;
     
+    WorldImage emptyDot;
     
-  }
+    public GameArt(Game game) {
+      this.maxGuesses = game.maxGuesses;
+      this.colors = game.gameColors;
+      
+      this.emptyDot = new RectangleImage(
+          this.dotSquareSide, 
+          this.dotSquareSide,
+          OutlineMode.SOLID,
+          this.bgColor);
+      this.emptyDot = new OverlayImage(this.emptyDot, 
+          new CircleImage(
+              this.dotSquareSide - this.dotRadiusGap,
+              OutlineMode.OUTLINE, this.outlineColor));
+    }
+    
+    public WorldImage produceImage() {
+      return availableColors;
+    }
+    
+    private Color getColor(int index) {
+      return this.colors.get(index);
+    }
+    
+    public WorldImage genFilledDot(Color col) {
+      return new OverlayImage(this.emptyDot,
+          new CircleImage(
+              this.dotSquareSide - this.dotRadiusGap,
+              OutlineMode.SOLID, col));
+    }
+    
+    public WorldImage genFilledDot(int index) {
+      return new OverlayImage(this.emptyDot,
+          new CircleImage(
+              this.dotSquareSide - this.dotRadiusGap,
+              OutlineMode.SOLID, this.getColor(index)));
+    }
+    
+    private WorldImage genColorList(ILoColor colList) {
+      WorldImage initial = new EmptyImage();
+      
+      initial = colList.fold(
+          initial,
+          (init, col) -> new BesideImage(
+              genFilledDot(col), 
+              init));
+      
+      return initial;
+    }
+    
+    private WorldImage genColorList(ILoInt colList, int numSlots) {
+      WorldImage initial = new EmptyImage();
+      
+      for (int i = colList.calcLength(); i < numSlots; i++) {
+         initial = new BesideImage(this.emptyDot, initial);
+      }
+      
+      initial = colList.fold(
+          initial,
+          (init, col) -> new BesideImage(
+              genFilledDot(col), 
+              init));
+      
+      return initial;
+    }
+   }
 }
 
 class Result {
@@ -182,6 +284,10 @@ interface ILoInt{
   // helper for mins, which receives the other compared list's first value, and
   // generates the minimum for the current index
   ILoInt doMins(int otherFirst, ILoInt otherRest);
+  
+  int calcLength();
+  
+  <T> T fold(T initial, BiFunction<T, Integer, T> folder);
 }
 
 class MtLoInt implements ILoInt{
@@ -239,6 +345,14 @@ class MtLoInt implements ILoInt{
 
   public ILoInt doMins(int otherFirst, ILoInt otherRest) {
     return new MtLoInt();
+  }
+  
+  public int calcLength() {
+    return 0;
+  }
+  
+  public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
+    return initial;
   }
 }
 
@@ -348,6 +462,16 @@ class ConsLoInt implements ILoInt{
 
   public ILoInt doMins(int otherFirst, ILoInt otherRest) {
     return new ConsLoInt(Math.min(this.first, otherFirst), otherRest.mins(this.rest));
+  }
+  
+  public int calcLength() {
+    return 1 + this.rest.calcLength();
+  }
+  
+  public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
+    return this.rest.fold(
+        folder.apply(initial, this.first), 
+        folder);
   }
 }
 
