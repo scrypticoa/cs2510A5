@@ -23,7 +23,7 @@ class ConsLoColor implements ILoColor {
 }
 
 class Game extends World {
-  Result compareResult;
+  ILoInt guess;
   
   int numColors;
   
