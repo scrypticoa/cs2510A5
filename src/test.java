@@ -37,7 +37,10 @@ class ConsLoColor implements ILoColor {
 }
 
 class Game extends World {
+  ILoInt sequence;
+  
   ILoInt guess;
+  int guessLength;
   
   int numColors;
   
@@ -54,8 +57,20 @@ class Game extends World {
     this.attemptCount = attemptCount;
     this.duplicatesAllowed = duplicatesAllowed;
     
-    numColors = gameColors.calcLength();
-    guess = new MtLoInt();
+    this.numColors = gameColors.calcLength();
+    
+    this.guess = new MtLoInt();
+    this.guessLength = 0;
+    
+    this.validate();
+  }
+  
+  private void validate() {
+    if (this.sequenceLength < 1) throw new IllegalArgumentException();
+    if (this.attemptCount < 1) throw new IllegalArgumentException();
+    if (this.numColors < 1) throw new IllegalArgumentException();
+    if (!this.duplicatesAllowed && this.sequenceLength > this.numColors)
+      throw new IllegalArgumentException();
   }
   
   public WorldScene makeScene() {
@@ -66,10 +81,15 @@ class Game extends World {
   public Game onKeyEvent(String key) {
     String nums = "123456789";
     if (nums.contains(key)) {
+      if (this.guessLength < this.sequenceLength) {
+        addGuess(Integer.parseInt(key));
+      }
     } else if (key.equals("delete" )) {
-      
+      removeGuess();
     } else if (key.equals("enter")) {
-      
+      if (this.guessLength == this.sequenceLength) {
+        submitGuess();
+      }
     }
       return this;
   }
@@ -77,9 +97,35 @@ class Game extends World {
   public Result genBlankResult() {
     return new Result(
         0,
-        new ConsLoInt(numColors),
-        new ConsLoInt(numColors));
-  }  
+        new ConsLoInt(this.numColors),
+        new ConsLoInt(this.numColors));
+  }
+  
+  private void addGuess(int color) {
+    this.guess = this.guess.insert(color);
+    this.guessLength++;
+  }
+  
+  private void removeGuess() {
+    if (this.guessLength > 1) {
+      this.guess = this.guess.remove();
+      this.guessLength--;
+    }
+  }
+  
+  private void submitGuess() {
+    Result res = this.guess.compare(this.sequence, this);
+    //update image
+  }
+  
+  class GameArt {
+    int dotSqaureSide = 10;
+    int dotRadiusGap = 2;
+    Color bgColor = new Color(150, 0, 0);
+    Color outlineColor = Color.black;
+    
+    
+  }
 }
 
 class Result {
