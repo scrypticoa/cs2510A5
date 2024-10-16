@@ -115,12 +115,12 @@ interface ILoInt{
   //finds sum of list
   int sum();
   
-  //takes in another list and compares each int 
+  // returns the minimum at each index between this and list, stopping when either list
+  // ends, passes this first value to the compared list
   ILoInt mins(ILoInt list);
-  // helper to get min at same pos in 2 lists
-  int minsCompare(int otherFirst);
-  // helper that gets the rest for the next comparison
-  ILoInt minsRHelp(ILoInt list);
+  // helper for mins, which receives the other compared list's first value, and
+  // generates the minimum for the current index
+  ILoInt doMins(int otherFirst, ILoInt otherRest);
 }
 
 class MtLoInt implements ILoInt{
@@ -135,8 +135,7 @@ class MtLoInt implements ILoInt{
    * doCompare(ILoInt other, Game game, Result result, int num) ... Result
    * sum() ... int
    * mins(ILoInt list) ... ILoInt
-   * minsCompare(int otherFirst) ... int
-   * minsRHelp(ILoInt list) ... ILoint
+   * doMins(int otherFirst, ILoInt otherRest) ... ILoInt
    */
   
   public ILoInt addAtPos(int pos) {
@@ -177,11 +176,7 @@ class MtLoInt implements ILoInt{
     return new MtLoInt();
   }
 
-  public int minsCompare(int otherFirst) {
-    return otherFirst;
-  }
-
-  public ILoInt minsRHelp(ILoInt list) {
+  public ILoInt doMins(int otherFirst, ILoInt otherRest) {
     return new MtLoInt();
   }
 }
@@ -274,18 +269,26 @@ class ConsLoInt implements ILoInt{
   }
 
   public int sum() {
-    return first + rest.sum();
+    return this.first + this.rest.sum();
   }
   
   public ILoInt mins(ILoInt list) {
-    return new ConsLoInt(list.minsCompare(this.first), list.minsRHelp(rest));
+    return list.doMins(this.first, this.rest);
   }
 
-  public int minsCompare(int otherFirst) {
-    return Math.min(this.first, otherFirst);
+  public ILoInt doMins(int otherFirst, ILoInt otherRest) {
+    return new ConsLoInt(Math.min(this.first, otherFirst), otherRest.mins(this.rest));
   }
+}
 
-  public ILoInt minsRHelp(ILoInt list) {
-    return list.mins(this.rest);
-  }
+class ExamplesILoInt {
+  ILoInt counting = new ConsLoInt(1, 
+      new ConsLoInt(2, 
+          new ConsLoInt(3, 
+              new ConsLoInt(4, 
+                  new MtLoInt()))));
+}
+
+class ExamplesMastermind {
+  
 }
