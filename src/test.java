@@ -150,10 +150,12 @@ class Game extends World {
     
     int maxGuesses;
     int numGuesses = 0;
+    int screenGuesses = 10;
+    int sequenceLength;
     
-    WorldImage availableColors;
+    WorldImage availableColorsIMG;
     WorldImage guessSlots;
-    WorldImage correctSequence;
+    WorldImage correctSequenceIMG;
     WorldImage hiddenSequence;
     
     int dotSquareSide = 10;
@@ -166,6 +168,7 @@ class Game extends World {
     public GameArt(Game game) {
       this.maxGuesses = game.maxGuesses;
       this.colors = game.gameColors;
+      this.sequenceLength = game.sequenceLength;
       
       this.emptyDot = new RectangleImage(
           this.dotSquareSide, 
@@ -176,28 +179,48 @@ class Game extends World {
           new CircleImage(
               this.dotSquareSide - this.dotRadiusGap,
               OutlineMode.OUTLINE, this.outlineColor));
+      
+      this.guessSlots = this.genInitGuessSlots();
+      this.availableColorsIMG = this.genAvailableColorsIMG();
+      this.correctSequenceIMG = this.genCorrectSequence(game.sequence);
+      this.hiddenSequence = this.genHiddenSequence();
     }
     
     public WorldImage produceImage() {
-      return availableColors;
+      return availableColorsIMG;
     }
     
-    private Color getColor(int index) {
-      return this.colors.get(index);
+    private WorldImage genHiddenSequence() {
+      return new RectangleImage(
+          this.sequenceLength * this.dotSquareSide,
+          this.dotSquareSide, 
+          OutlineMode.SOLID, Color.black);
     }
     
-    public WorldImage genFilledDot(Color col) {
-      return new OverlayImage(this.emptyDot,
-          new CircleImage(
-              this.dotSquareSide - this.dotRadiusGap,
-              OutlineMode.SOLID, col));
+    private WorldImage genCorrectSequence(ILoInt seq) {
+      return genColorList(seq, seq.calcLength());
     }
     
-    public WorldImage genFilledDot(int index) {
-      return new OverlayImage(this.emptyDot,
-          new CircleImage(
-              this.dotSquareSide - this.dotRadiusGap,
-              OutlineMode.SOLID, this.getColor(index)));
+    private WorldImage genAvailableColorsIMG() {
+      return genColorList(this.colors);
+    }
+    
+    public void updateGuessSlots(ILoInt guess) {
+      this.guessSlots = new OverlayOffsetAlign(
+          AlignModeX.CENTER, AlignModeY.BOTTOM,
+          genColorList(guess, this.sequenceLength),
+          0, this.calcGuessLine() * this.dotSquareSide,
+          this.guessSlots);
+    }
+    
+    private WorldImage genInitGuessSlots() {
+      WorldImage initial = new EmptyImage();
+      for (int i = 0; i < this.screenGuesses; i++) {
+        initial = new AboveImage(
+            genColorList(new MtLoInt(), this.sequenceLength),
+            initial);
+      }
+      return initial;
     }
     
     private WorldImage genColorList(ILoColor colList) {
@@ -227,7 +250,34 @@ class Game extends World {
       
       return initial;
     }
-   }
+    
+    public WorldImage genFilledDot(Color col) {
+      return new OverlayImage(this.emptyDot,
+          new CircleImage(
+              this.dotSquareSide - this.dotRadiusGap,
+              OutlineMode.SOLID, col));
+    }
+    
+    public WorldImage genFilledDot(int index) {
+      return new OverlayImage(this.emptyDot,
+          new CircleImage(
+              this.dotSquareSide - this.dotRadiusGap,
+              OutlineMode.SOLID, this.getColor(index)));
+    }
+    
+    private Color getColor(int index) {
+      return this.colors.get(index);
+    }
+    
+    private int calcGuessLine() {
+      if (this.numGuesses >= this.screenGuesses-1) {
+        if (this.numGuesses == this.maxGuesses-1) {
+          return this.screenGuesses - 1;
+        } else return this.screenGuesses - 2;
+      }
+      return this.numGuesses;
+    }
+  }
 }
 
 class Result {
