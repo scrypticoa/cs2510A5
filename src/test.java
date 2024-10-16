@@ -5,11 +5,13 @@ import javalib.funworld.*;
 import java.awt.Color;
 
 interface ILoColor {
-
+  int calcLength();
 }
 
 class MtLoColor implements ILoColor {
-  
+  public int calcLength() {
+    return 0;
+  }
 }
 
 class ConsLoColor implements ILoColor {
@@ -19,6 +21,18 @@ class ConsLoColor implements ILoColor {
   public ConsLoColor(Color first, ILoColor rest) {
     this.first = first;
     this.rest = rest;
+  }
+  
+  static ConsLoColor gen(Color firstColor, Color...cols) {
+    ILoColor temp = new MtLoColor();
+    for (int i = cols.length-1; i > -1; i--) {
+      temp = new ConsLoColor(cols[i], temp);
+    }
+    return new ConsLoColor(firstColor, temp);
+  }
+  
+  public int calcLength() {
+    return 1 + this.rest.calcLength();
   }
 }
 
@@ -40,6 +54,7 @@ class Game extends World {
     this.attemptCount = attemptCount;
     this.duplicatesAllowed = duplicatesAllowed;
     
+    numColors = gameColors.calcLength();
     guess = new MtLoInt();
   }
   
@@ -139,7 +154,7 @@ class MtLoInt implements ILoInt{
    */
   
   public ILoInt addAtPos(int pos) {
-    return new MtLoInt();
+    throw new IndexOutOfBoundsException();
   }
   
   public ILoInt insert(int num) {
@@ -190,13 +205,22 @@ class ConsLoInt implements ILoInt{
     this.rest = rest;
   }
   
-  ConsLoInt(int x){
+  ConsLoInt(int size) throws IllegalArgumentException {
+    if (size < 1) throw new IllegalArgumentException("ConsLoInt zero constructor cannot accpet size less than one");
     first = 0;
-    if(x > 1) {
-      rest =  new ConsLoInt(x-1);
+    if(size > 1) {
+      rest =  new ConsLoInt(size-1);
     } else {
       rest = new MtLoInt();
     }
+  }
+  
+  static ConsLoInt gen(int firstNum, int...nums) {
+    ILoInt temp = new MtLoInt();
+    for (int i = nums.length-1; i > -1; i--) {
+      temp = new ConsLoInt(nums[i], temp);
+    }
+    return new ConsLoInt(firstNum, temp);
   }
   
   /*TEMPLATE:
@@ -231,7 +255,7 @@ class ConsLoInt implements ILoInt{
   
   public ILoInt addAtPos(int pos) {
     if(pos == 0){
-      return new ConsLoInt(this.first + 1, this.rest);
+      return new ConsLoInt(this.first + 1, this.rest.clone());
     }
     return new ConsLoInt(this.first, this.rest.addAtPos(pos-1));
   }
@@ -241,7 +265,7 @@ class ConsLoInt implements ILoInt{
   }
   
   public ILoInt remove() {
-    return this.rest;
+    return this.rest.clone();
   }
   
   public ILoInt clone() {
@@ -287,6 +311,64 @@ class ExamplesILoInt {
           new ConsLoInt(3, 
               new ConsLoInt(4, 
                   new MtLoInt()))));
+  
+  ILoInt countingGen = ConsLoInt.gen(1, 2, 3, 4);
+  
+  ILoInt reverseCounting = ConsLoInt.gen(4, 3, 2, 1);
+  
+  ILoInt singleGen = ConsLoInt.gen(1);
+  
+  ILoInt empty = new MtLoInt();
+  
+  void testZerosConstructor(Tester t) {
+    t.checkConstructorException(
+        new IllegalArgumentException("ConsLoInt zero constructor cannot accpet size less than one"), 
+        "ConsLoInt", 
+        0);
+    t.checkExpect(new ConsLoInt(5), ConsLoInt.gen(0, 0, 0, 0, 0));
+  }
+  
+  void testGen(Tester t) {
+    t.checkExpect(countingGen, counting);
+    t.checkExpect(singleGen, new ConsLoInt(1, new MtLoInt()));
+  }
+  
+  void testAddAtPos(Tester t) {
+    t.checkExpect(counting.addAtPos(2), ConsLoInt.gen(1, 2, 4, 4));
+    t.checkException(new IndexOutOfBoundsException(), counting, "addAtPos", 4);
+  }
+  
+  void testInsert(Tester t) {
+    t.checkExpect(empty.insert(5), ConsLoInt.gen(5));
+    t.checkExpect(counting.insert(0), ConsLoInt.gen(0, 1, 2, 3, 4));
+  }
+  
+  void testRemove(Tester t) {
+    t.checkExpect(empty.remove(), empty);
+    t.checkExpect(counting.remove(), ConsLoInt.gen(2, 3, 4));
+  }
+  
+  void testClone(Tester t) {
+    t.checkExpect(counting.clone(), counting);
+  }
+  
+  void testCompare(Tester t) {
+    Game dummyGame = new Game(ConsLoColor.gen(Color.black, Color.red, Color.white, Color.cyan, Color.orange), 4, 9, true);
+    Result res = counting.compare(reverseCounting, dummyGame);
+    t.checkExpect(res.calcInexactCount(), 4);
+  }
+  
+  void testSum(Tester t) {
+    t.checkExpect(counting.sum(), 10);
+    t.checkExpect(empty.sum(), 0);
+  }
+  
+  void testMins(Tester t) {
+    t.checkExpect(counting.mins(empty), empty);
+    t.checkExpect(counting.mins(reverseCounting), ConsLoInt.gen(1, 2, 2, 1));
+    t.checkExpect(empty.mins(counting), empty);
+    t.checkExpect(counting.mins(singleGen), singleGen);
+  }
 }
 
 class ExamplesMastermind {
