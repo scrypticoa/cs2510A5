@@ -63,7 +63,11 @@ class ConsLoColor implements ILoColor {
 class Game extends World {
   GameArt art;
   
+  boolean finished = false;
+  
   ILoInt sequence;
+  
+  Random rand;
   
   ILoInt guess;
   int guessLength;
@@ -89,6 +93,11 @@ class Game extends World {
     this.guess = new MtLoInt();
     this.guessLength = 0;
     
+    this.rand = new Random();
+    this.sequence = this.genSequence();
+    
+    this.art = new GameArt(this);
+    
     this.validate();
   }
   
@@ -100,12 +109,39 @@ class Game extends World {
       throw new IllegalArgumentException();
   }
   
-  public WorldScene makeScene() {
-    // TODO Auto-generated method stub
-    return null;
+  private ILoInt genSequence() {
+    if (duplicatesAllowed) {
+      ILoInt seq = new MtLoInt();
+      for (int i = 0; i < this.sequenceLength; i++) {
+        seq.insert(this.rand.nextInt(this.numColors));
+      }
+      return seq;
+    }
+    String seen = "";
+    ILoInt seq = new MtLoInt();
+    for (int i = 0; i < this.sequenceLength; i++) {
+      Integer val = -1;
+      do {
+        val = this.rand.nextInt(this.numColors);
+      } while(seen.contains(val.toString()));
+      seq.insert(val);
+      seen += val;
+    }
+    return seq;
   }
   
+  public boolean startGame() {
+    return art.doBigBang(this);
+  }
+  
+  @Override
+  public WorldScene makeScene() {
+    return art.produceImage();
+  }
+  
+  @Override
   public Game onKeyEvent(String key) {
+    if (this.finished) return this;
     String nums = "123456789";
     if (nums.contains(key)) {
       if (this.guessLength < this.sequenceLength) {
@@ -131,6 +167,8 @@ class Game extends World {
   private void addGuess(int color) {
     this.guess = this.guess.insert(color);
     this.guessLength++;
+    
+    this.art.updateGuessSlots(this.guess);
   }
   
   private void removeGuess() {
@@ -138,15 +176,31 @@ class Game extends World {
       this.guess = this.guess.remove();
       this.guessLength--;
     }
+    
+    this.art.updateGuessSlots(this.guess);
   }
   
   private void submitGuess() {
+    this.numGuesses++;
+    
     Result res = this.guess.compare(this.sequence, this);
-    //update image
+    
+    if (res.didWin(this.sequenceLength)) {
+      finished = true;
+      art.submitCorrectGuess(this.guess, this.sequenceLength, 0);
+    } else {
+      if (this.numGuesses == this.maxGuesses) finished = true;
+      art.submitFalseGuess(guess, res.exact, res.calcInexactCount());
+    }
+    
+    this.guess = new MtLoInt();
   }
   
   class GameArt {
     ILoColor colors;
+    
+    WorldScene worldScene;
+    int height = 200;
     
     int maxGuesses;
     int numGuesses = 0;
@@ -155,13 +209,16 @@ class Game extends World {
     
     WorldImage availableColorsIMG;
     WorldImage guessSlots;
-    WorldImage correctSequenceIMG;
+    WorldImage winSequenceIMG;
+    WorldImage loseSequenceIMG;
     WorldImage hiddenSequence;
     
     int dotSquareSide = 10;
     int dotRadiusGap = 2;
     Color bgColor = new Color(150, 0, 0);
     Color outlineColor = Color.black;
+    
+    Double gameWidth;
     
     WorldImage emptyDot;
     
@@ -182,12 +239,95 @@ class Game extends World {
       
       this.guessSlots = this.genInitGuessSlots();
       this.availableColorsIMG = this.genAvailableColorsIMG();
-      this.correctSequenceIMG = this.genCorrectSequence(game.sequence);
+      this.winSequenceIMG = this.genSequence(game.sequence, "Win!");
+      this.loseSequenceIMG = this.genSequence(game.sequence, "Lose!");
       this.hiddenSequence = this.genHiddenSequence();
+      
+      gameWidth = Math.max(
+          availableColorsIMG.getWidth(),
+          guessSlots.getWidth() + (this.dotSquareSide * 2));
+      gameWidth = Math.max(gameWidth, this.winSequenceIMG.getWidth());
+      gameWidth = Math.ceil(Math.max(gameWidth, this.loseSequenceIMG.getWidth()));      
+    
+      WorldImage screen = new AboveAlignImage(
+          AlignModeX.LEFT,
+          this.hiddenSequence,
+          this.guessSlots,
+          this.availableColorsIMG);
+      Double height = Math.ceil(screen.getHeight());
+      this.height = height.intValue();
+      
+      this.worldScene = new WorldScene(gameWidth.intValue(), this.height);
     }
     
-    public WorldImage produceImage() {
-      return availableColorsIMG;
+    public boolean doBigBang(Game game) {
+      return game.bigBang(this.gameWidth.intValue(), this.height);
+    }
+    
+    public WorldScene produceImage() {
+      WorldImage screen = new AboveAlignImage(
+          AlignModeX.LEFT,
+          this.hiddenSequence,2
+          this.guessSlots,
+          this.availableColorsIMG);
+      Double screenHeight = Math.ceil(screen.getHeight());
+      
+      screen = new OverlayOffsetAlign(
+          AlignModeX.LEFT, AlignModeY.BOTTOM,
+          screen, 0, 0,
+          new RectangleImage(
+              screenHeight.intValue(), gameWidth.intValue(),
+              OutlineMode.SOLID, this.bgColor));
+      
+      this.worldScene.placeImageXY(
+          new RectangleImage(this.gameWidth.intValue(), height, OutlineMode.SOLID, this.bgColor),
+          0, 0);
+      this.worldScene.placeImageXY(screen, 0, 0);
+      
+      return this.worldScene;
+    }
+    
+    public void submitFalseGuess(ILoInt guess, int exact, int inexact) {
+      WorldImage guessOutput = new BesideImage(
+          genColorList(guess, this.sequenceLength),
+          genGuessResult(exact, inexact));
+      updateGuessImage(guessOutput);
+      
+      prepareNextGuess();
+      
+      if (this.numGuesses == this.maxGuesses) {
+        this.hiddenSequence = this.loseSequenceIMG;
+      }
+    }
+    
+    public void submitCorrectGuess(ILoInt guess, int exact, int inexact) {
+      WorldImage guessOutput = new BesideImage(
+          genColorList(guess, this.sequenceLength),
+          genGuessResult(exact, inexact));
+      updateGuessImage(guessOutput);
+      
+      prepareNextGuess();
+      
+      this.hiddenSequence = this.winSequenceIMG;
+    }
+    
+    private void prepareNextGuess() {      
+      int prevGuessLine = this.calcGuessLine();
+      this.numGuesses++;
+      
+      if (this.calcGuessLine() != prevGuessLine) return;
+
+      Double height = Math.ceil(this.guessSlots.getWidth());
+      Double width = Math.ceil(this.guessSlots.getHeight()) - this.dotSquareSide;
+      this.guessSlots = new CropImage(
+          0, 0,
+          height.intValue(),
+          width.intValue(),
+          this.guessSlots);
+      this.guessSlots = new AboveImage(
+          this.genColorList(new MtLoInt(), this.sequenceLength),
+          this.guessSlots);
+      
     }
     
     private WorldImage genHiddenSequence() {
@@ -197,8 +337,12 @@ class Game extends World {
           OutlineMode.SOLID, Color.black);
     }
     
-    private WorldImage genCorrectSequence(ILoInt seq) {
-      return genColorList(seq, seq.calcLength());
+    private WorldImage genSequence(ILoInt seq, String text) {
+      WorldImage seqImg = genColorList(seq, seq.calcLength());
+      seqImg = new BesideImage(
+          seqImg,
+          new TextImage(text, 20, Color.white));
+      return seqImg;
     }
     
     private WorldImage genAvailableColorsIMG() {
@@ -206,9 +350,13 @@ class Game extends World {
     }
     
     public void updateGuessSlots(ILoInt guess) {
+      updateGuessImage(genColorList(guess, this.sequenceLength));
+    }
+    
+    private void updateGuessImage(WorldImage image) {
       this.guessSlots = new OverlayOffsetAlign(
-          AlignModeX.CENTER, AlignModeY.BOTTOM,
-          genColorList(guess, this.sequenceLength),
+          AlignModeX.LEFT, AlignModeY.BOTTOM,
+          image,
           0, this.calcGuessLine() * this.dotSquareSide,
           this.guessSlots);
     }
@@ -221,6 +369,21 @@ class Game extends World {
             initial);
       }
       return initial;
+    }
+    
+    private WorldImage genGuessResult(int exact, int inexact) {
+      WorldImage box = new RectangleImage(
+          this.dotSquareSide, 
+          this.dotSquareSide,
+          OutlineMode.SOLID,
+          this.bgColor);
+      WorldImage exactRes = new OverlayImage(
+          new TextImage(Integer.toString(exact), 20, Color.white),
+          box);
+      WorldImage inexactRes = new OverlayImage(
+          new TextImage(Integer.toString(inexact), 20, Color.white),
+          box);
+      return new BesideImage(exactRes, inexactRes);
     }
     
     private WorldImage genColorList(ILoColor colList) {
@@ -309,6 +472,10 @@ class Result {
   public int calcInexactCount() {
     ILoInt mins = inexactCount1.mins(inexactCount2);
     return mins.sum();
+  }
+  
+  public boolean didWin(int sequenceLength) {
+    return this.exact == sequenceLength;
   }
 }
 
@@ -592,5 +759,10 @@ class ExamplesILoInt {
 }
 
 class ExamplesMastermind {
-  
+  boolean testBigBang(Tester t) {
+    Game game = new Game(
+        ConsLoColor.gen(Color.red, Color.blue, Color.yellow), 5,
+        10, true);
+    return game.startGame();
+  }
 }
