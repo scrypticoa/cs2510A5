@@ -34,6 +34,8 @@ class Game extends World {
     
     this.numColors = gameColors.calcLength();
     
+    this.validate();
+    
     this.guess = new MtLoInt();
     this.guessLength = 0;
     
@@ -43,8 +45,6 @@ class Game extends World {
     System.out.println(sequence.print());
     
     this.art = new GameArt(this);
-    
-    this.validate();
   }
   
   public Game(ILoColor gameColors, int sequenceLength,
@@ -62,23 +62,21 @@ class Game extends World {
   
   private ILoInt genSequence() {
     if (duplicatesAllowed) {
-      ILoInt seq = new MtLoInt();
-      for (int i = 0; i < this.sequenceLength; i++) {
-        seq = seq.insert(this.rand.nextInt(this.numColors));
-      }
-      return seq;
+      return genSequenceDuplicates(this.sequenceLength, new MtLoInt());
     }
-    String seen = "";
-    ILoInt seq = new MtLoInt();
-    for (int i = 0; i < this.sequenceLength; i++) {
-      Integer val = -1;
-      do {
-        val = this.rand.nextInt(this.numColors);
-      } while(seen.contains(val.toString()));
-      seq = seq.insert(val);
-      seen += val;
-    }
-    return seq;
+    return genSequenceNoDuplicates(this.sequenceLength, new MtLoInt(), "");
+  }
+  
+  private ILoInt genSequenceDuplicates(int length, ILoInt seq) {
+    if (length < 1) return seq;
+    return genSequenceDuplicates(length - 1, seq.insert(this.rand.nextInt(this.numColors)));
+  }
+  
+  private ILoInt genSequenceNoDuplicates(int length, ILoInt seq, String seen) {
+    if (length < 1) return seq;
+    Integer val = this.rand.nextInt(this.numColors);
+    if (seen.contains(val.toString())) return genSequenceNoDuplicates(length, seq, seen);
+    return genSequenceNoDuplicates(length - 1, seq.insert(val), seen.concat(val.toString()));
   }
   
   public boolean startGame() {
@@ -321,13 +319,14 @@ class Game extends World {
     }
     
     private WorldImage genInitGuessSlots() {
-      WorldImage initial = new EmptyImage();
-      for (int i = 0; i < this.screenGuesses; i++) {
-        initial = new AboveImage(
-            genColorList(new MtLoInt(), this.sequenceLength),
-            initial);
-      }
-      return initial;
+      WorldImage emptySlots = genColorList(new MtLoInt(), this.sequenceLength);
+      
+      return doGenInitGuessSlots(this.screenGuesses, new EmptyImage(), emptySlots);
+    }
+    
+    private WorldImage doGenInitGuessSlots(int length, WorldImage img, WorldImage slots) {
+      if (length < 1) return img;
+      return doGenInitGuessSlots(length - 1, new AboveImage(slots, img), slots);
     }
     
     private WorldImage genGuessResult(int exact, int inexact) {
@@ -358,11 +357,7 @@ class Game extends World {
     }
     
     private WorldImage genColorList(ILoInt colList, int numSlots) {
-      WorldImage initial = new EmptyImage();
-      
-      for (int i = colList.calcLength(); i < numSlots; i++) {
-         initial = new BesideImage(this.emptyDot, initial);
-      }
+      WorldImage initial = genEmptyDotsBeside(numSlots - colList.calcLength(), new EmptyImage());
       
       initial = colList.fold(
           initial,
@@ -371,6 +366,11 @@ class Game extends World {
               init));
       
       return initial;
+    }
+    
+    private WorldImage genEmptyDotsBeside(int length, WorldImage img) {
+      if (length < 1) return img;
+      return genEmptyDotsBeside(length - 1, new BesideImage(this.emptyDot, img));
     }
     
     public WorldImage genFilledDot(Color col) {
@@ -401,5 +401,15 @@ class Game extends World {
       }
       return this.numGuesses;
     }
+  }
+}
+
+
+class ExamplesMastermind {
+  boolean testBigBang(Tester t) {
+    Game game = new Game(
+        ConsLoColor.gen(Color.red, Color.blue, Color.yellow, Color.magenta, Color.green), 5,
+        20, false);
+    return game.startGame();
   }
 }

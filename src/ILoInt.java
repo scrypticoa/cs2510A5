@@ -290,12 +290,3 @@ class ExamplesILoInt {
     t.checkExpect(counting.mins(singleGen), singleGen);
   }
 }
-
-class ExamplesMastermind {
-  boolean testBigBang(Tester t) {
-    Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.yellow), 5,
-        20, true);
-    return game.startGame();
-  }
-}
