@@ -275,6 +275,7 @@ class ConsLoInt implements ILoInt{
   }
 }
 
+//contains tests for ILoInt
 class ExamplesILoInt {
   ILoInt counting = new ConsLoInt(1, 
       new ConsLoInt(2, 
@@ -290,53 +291,78 @@ class ExamplesILoInt {
   
   ILoInt empty = new MtLoInt();
   
-  void testZerosConstructor(Tester t) {
-    t.checkConstructorException(
+  //tests zerosConstructor
+  public boolean testZerosConstructor(Tester t) {
+    return t.checkConstructorException(
         new IllegalArgumentException("ConsLoInt zero constructor cannot accpet size less than one"), 
         "ConsLoInt", 
-        0);
-    t.checkExpect(new ConsLoInt(5), ConsLoInt.gen(0, 0, 0, 0, 0));
+        0)
+    && t.checkExpect(new ConsLoInt(5), ConsLoInt.gen(0, 0, 0, 0, 0));
   }
   
-  void testGen(Tester t) {
-    t.checkExpect(countingGen, counting);
-    t.checkExpect(singleGen, new ConsLoInt(1, new MtLoInt()));
+  //tests gen
+  public boolean testGen(Tester t) {
+    return t.checkExpect(countingGen, counting)
+    && t.checkExpect(singleGen, new ConsLoInt(1, new MtLoInt()));
   }
   
-  void testAddAtPos(Tester t) {
-    t.checkExpect(counting.addAtPos(2), ConsLoInt.gen(1, 2, 4, 4));
-    t.checkException(new IndexOutOfBoundsException(), counting, "addAtPos", 4);
+  //tests addAtPos
+  public boolean testAddAtPos(Tester t) {
+    return t.checkExpect(counting.addAtPos(2), ConsLoInt.gen(1, 2, 4, 4))
+    && t.checkException(new IndexOutOfBoundsException(), counting, "addAtPos", 4);
   }
   
-  void testInsert(Tester t) {
-    t.checkExpect(empty.insert(5), ConsLoInt.gen(5));
-    t.checkExpect(counting.insert(0), ConsLoInt.gen(0, 1, 2, 3, 4));
+  //tests insert
+  public boolean testInsert(Tester t) {
+    return t.checkExpect(empty.insert(5), ConsLoInt.gen(5))
+    && t.checkExpect(counting.insert(0), ConsLoInt.gen(0, 1, 2, 3, 4));
   }
   
-  void testRemove(Tester t) {
-    t.checkExpect(empty.remove(), empty);
-    t.checkExpect(counting.remove(), ConsLoInt.gen(2, 3, 4));
+  //tests remove
+  public boolean testRemove(Tester t) {
+    return t.checkExpect(empty.remove(), empty)
+    && t.checkExpect(counting.remove(), ConsLoInt.gen(2, 3, 4));
   }
   
-  void testClone(Tester t) {
-    t.checkExpect(counting.clone(), counting);
+  //tests clone
+  public boolean testClone(Tester t) {
+    return t.checkExpect(counting.clone(), counting);
   }
   
-  void testCompare(Tester t) {
+  //tests compare
+  public boolean testCompare(Tester t) {
     Game dummyGame = new Game(ConsLoColor.gen(Color.black, Color.red, Color.white, Color.cyan, Color.orange), 4, 9, true);
     Result res = counting.compare(reverseCounting, dummyGame);
-    t.checkExpect(res.calcInexactCount(), 4);
+    return t.checkExpect(res.calcInexactCount(), 4);
   }
   
-  void testSum(Tester t) {
-    t.checkExpect(counting.sum(), 10);
-    t.checkExpect(empty.sum(), 0);
+  //tests sum
+  public boolean testSum(Tester t) {
+    return t.checkExpect(counting.sum(), 10)
+    && t.checkExpect(empty.sum(), 0);
   }
   
-  void testMins(Tester t) {
-    t.checkExpect(counting.mins(empty), empty);
-    t.checkExpect(counting.mins(reverseCounting), ConsLoInt.gen(1, 2, 2, 1));
-    t.checkExpect(empty.mins(counting), empty);
-    t.checkExpect(counting.mins(singleGen), singleGen);
+  //tests mins
+  public boolean testMins(Tester t) {
+    return t.checkExpect(counting.mins(empty), empty)
+    && t.checkExpect(counting.mins(reverseCounting), ConsLoInt.gen(1, 2, 2, 1))
+    && t.checkExpect(empty.mins(counting), empty)
+    && t.checkExpect(counting.mins(singleGen), singleGen);
+  }
+  
+  //tests print
+  public boolean testPrint(Tester t) {
+    // tests a genric list
+    return t.checkExpect(counting.print(), "1234")
+        // test an empty
+        && t.checkExpect(empty.print(), "");
+  }
+  
+  //tests calcLength
+  public boolean testCalcLength(Tester t) {
+    // tests a genric list
+    return t.checkExpect(counting.calcLength(), 4)
+        // test an empty
+        && t.checkExpect(empty.calcLength(), 0);
   }
 }

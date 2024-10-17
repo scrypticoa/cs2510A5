@@ -1,3 +1,4 @@
+import tester.Tester;
 //creates an object to hold info about exact and inexact guesses
 class Result {
   int exact;
@@ -66,3 +67,78 @@ class Result {
     return this.exact == sequenceLength;
   }
 }
+
+//contains tests for Result
+class ExamplesResult{
+  ILoInt mt = new MtLoInt();
+  ILoInt l1 = new ConsLoInt(3);
+  ILoInt l2 = new ConsLoInt(1,  new ConsLoInt(0, new ConsLoInt(0, mt)));
+  ILoInt l3 = new ConsLoInt(0,  new ConsLoInt(1, new ConsLoInt(0, mt)));
+  Result r1 = new Result(0, l1, l1);
+  Result r2 = new Result(2, mt, mt);
+  
+  ILoInt l4 = new ConsLoInt(1,  new ConsLoInt(5, new ConsLoInt(3, mt)));
+  ILoInt l5 = new ConsLoInt(2,  new ConsLoInt(2, new ConsLoInt(4, mt)));
+  
+  Result r3 = new Result(0, l2, l3);
+  Result r4 = new Result(0, l4, l5);
+  
+  //tests for addExact
+  public boolean testAddExact(Tester t)
+  {
+    // tests a generic Result
+    return t.checkExpect(r1.addExact(), new Result(1, l1, l1))
+        //tests with mts
+        && t.checkExpect(r2.addExact(), new Result(3, mt, mt));
+  }
+  
+  //tests for addInexact1
+  public boolean testAddInexact1(Tester t)
+  {
+    // tests a generic Result at pos 0
+    return t.checkExpect(r1.addInexact1(0), new Result(1, l2, l1))
+        //test a genric Result as pos >0
+        && t.checkExpect(r1.addInexact1(2), new Result(1, l3, l1))
+        //tests with mts
+        && t.checkException(new IndexOutOfBoundsException(), r2,
+            "addInexact1", 0);
+  }
+  
+  //tests for addInexact2
+  public boolean testAddInexact2(Tester t)
+  {
+    // tests a generic Result at pos 0
+    return t.checkExpect(r1.addInexact2(0), new Result(1, l1, l2))
+        //test a genric Result as pos >0
+        && t.checkExpect(r1.addInexact2(2), new Result(1, l1, l3))
+        //tests with mts
+        && t.checkException(new IndexOutOfBoundsException(), r2,
+            "addInexact2", 0);
+  }
+ 
+  //tests for didWin
+  public boolean testCalcInexactCount(Tester t)
+  {
+    // tests with 2 mts
+    return t.checkExpect(r1.calcInexactCount(), 0)
+        // tets where there are zero inexacts
+        && t.checkExpect(r3.calcInexactCount(), 0)
+        // tests with more than one inexacts
+        && t.checkExpect(r4.calcInexactCount(), 6);
+  }
+  
+  //tests for didWin
+  public boolean testDidWin(Tester t)
+  {
+    // tests a generic Result with a sequence length of zero
+    return t.checkExpect(r1.didWin(0), true)
+        // tests a false case
+        && t.checkExpect(r1.didWin(2), false)
+        // generic test
+        && t.checkExpect(r2.didWin(2), true);
+  }
+  
+}
+
+
+
