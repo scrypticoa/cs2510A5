@@ -357,4 +357,12 @@ class ExamplesILoInt {
         // test an empty
         && t.checkExpect(empty.print(), "");
   }
+  
+  //tests calcLength
+  public boolean testCalcLength(Tester t) {
+    // tests a genric list
+    return t.checkExpect(counting.calcLength(), 4)
+        // test an empty
+        && t.checkExpect(empty.calcLength(), 0);
+  }
 }
