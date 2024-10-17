@@ -245,7 +245,7 @@ class Game extends World {
     
     int dotSquareSide = 26; // even
     int dotRadiusGap = 2;
-    Color bgColor = new Color(150, 0, 0);
+    Color bgColor = new Color(120, 0, 10);
     Color outlineColor = Color.black;
     
     WorldImage emptyDot;
@@ -336,7 +336,7 @@ class Game extends World {
      */
     
     boolean doBigBang(Game game) {
-      return game.bigBang(this.gameWidth.intValue(), this.height, 10);
+      return game.bigBang(this.width, this.height, 10);
     }
     
     WorldScene produceImage() {
@@ -396,12 +396,12 @@ class Game extends World {
       
       if (this.calcGuessLine() != prevGuessLine) return;
 
-      Double height = Math.ceil(this.guessSlots.getWidth());
-      Double width = Math.ceil(this.guessSlots.getHeight()) - this.dotSquareSide;
+      Double height = Math.ceil(this.guessSlots.getHeight()) - this.dotSquareSide;
+      Double width = Math.ceil(this.guessSlots.getWidth());
       this.guessSlots = new CropImage(
           0, 0,
-          height.intValue(),
           width.intValue(),
+          height.intValue(),
           this.guessSlots);
       this.guessSlots = new AboveAlignImage( AlignModeX.LEFT,
           this.genColorList(new MtLoInt(), this.sequenceLength),
@@ -800,6 +800,67 @@ class ExamplesGame {
 
 class ExamplesGameArt {
   
+  Color bgColor;
+  
+  WorldImage emptyDot;
+  WorldImage filledDotRed;
+  WorldImage filledDotOrange;
+  WorldImage filledDotWhite;
+  WorldImage filledDotMagenta;
+  
+  WorldImage fourEmptyDots;
+  
+  WorldImage colorPallette;
+  
+  public ExamplesGameArt() {
+    this.bgColor = new Color(120, 0, 10);
+    
+    this.emptyDot = new RectangleImage(26, 26, OutlineMode.SOLID, this.bgColor);
+    
+    this.emptyDot = new OverlayImage( 
+        new CircleImage(
+            (26 / 2) - 2,
+            OutlineMode.OUTLINE, Color.black),
+        this.emptyDot);
+    
+    this.filledDotRed = new OverlayImage(
+        new CircleImage(
+            (26 / 2) - 2,
+            OutlineMode.SOLID, Color.red),
+        this.emptyDot);
+    
+    this.filledDotOrange = new OverlayImage(
+        new CircleImage(
+            (26 / 2) - 2,
+            OutlineMode.SOLID, Color.orange),
+        this.emptyDot);
+    
+    this.filledDotWhite = new OverlayImage(
+        new CircleImage(
+            (26 / 2) - 2,
+            OutlineMode.SOLID, Color.white),
+        this.emptyDot);
+    
+    this.filledDotMagenta = new OverlayImage(
+        new CircleImage(
+            (26 / 2) - 2,
+            OutlineMode.SOLID, Color.magenta),
+        this.emptyDot);
+    
+    this.fourEmptyDots = new BesideImage(this.emptyDot, this.emptyDot, this.emptyDot, this.emptyDot, new EmptyImage());
+    
+    this.colorPallette =
+        new BesideImage( 
+            new BesideImage(
+                new BesideImage(
+                    new BesideImage(
+                        new EmptyImage(), this.filledDotRed), 
+                    this.filledDotOrange), 
+                this.filledDotWhite), 
+            this.filledDotMagenta);
+  }
+  
+  
   //generic duplicates set random
   Game blankGame = new Game(
     ConsLoColor.gen(Color.red, Color.orange, Color.white, Color.magenta), 4,
@@ -895,14 +956,34 @@ class ExamplesGameArt {
     
     // generic duplicates set random
     Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
+        ConsLoColor.gen(Color.blue, Color.red), 4,
         20, true, new Random(1));
     
     // elevated guess due to prepare next guess
     game.art.prepareNextGuess();
     game.addGuess(1);
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    WorldImage threeEmptyDots = new BesideImage(this.emptyDot, this.emptyDot, this.emptyDot, new EmptyImage());
+    
+    out |= t.checkExpect(game.art.guessSlots, new OverlayOffsetAlign(
+        AlignModeX.LEFT,
+        AlignModeY.BOTTOM,
+        new BesideImage(
+            this.filledDotRed,
+            threeEmptyDots),
+        0, 26,
+        new AboveImage(
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            new EmptyImage())));
     
     // scrolling functionality:
     
@@ -913,15 +994,54 @@ class ExamplesGameArt {
     
     // non scroll guesses
     for (int i = 0; i < 8; i++) {
-      game2.guess = ConsLoInt.gen(1, 1, 1, 1);
+      game2.guess = ConsLoInt.gen(0, 0, 0, 0);
       game2.guessLength = 4;
       game2.submitGuess();
     }
     
+    WorldImage fourRedDots = new BesideImage(this.filledDotRed, this.filledDotRed,
+        this.filledDotRed, this.filledDotRed, new EmptyImage());
+    
     // scroll down:
     game2.art.prepareNextGuess();
     
-    out |= t.checkExpect(game2.art.produceImage(), new MtLoInt());
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square1 = new OverlayImage(new TextImage("1", 20, Color.white), square);
+    WorldImage square0 = new OverlayImage(new TextImage("0", 20, Color.white), square);
+    
+    WorldImage squares = new BesideImage(square1,square0);
+    
+    WorldImage guessSubRes = new BesideImage(fourRedDots, squares);
+    
+    WorldImage img = new AboveImage(
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots, new EmptyImage());
+    
+    for (int i = 0; i < 8; i++) {
+      img = new OverlayOffsetAlign(AlignModeX.LEFT, AlignModeY.BOTTOM,
+          guessSubRes, 0, i * 26, img);
+    }
+    
+    Double height = Math.ceil(img.getHeight()) - 26;
+    Double width = Math.ceil(img.getWidth());
+    img = new CropImage(
+        0, 0,
+        width.intValue(),
+        height.intValue(),
+        img);
+    img = new AboveAlignImage( AlignModeX.LEFT,
+        this.fourEmptyDots,
+        img);
+    
+    out |= t.checkExpect(game2.art.guessSlots, img);
     
     return out;
   }
@@ -929,18 +1049,18 @@ class ExamplesGameArt {
   boolean testGenHiddenSequence(Tester t) {
     boolean out = true;
     
-    out |= t.checkExpect(blankGame.art.genHiddenSequence(), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genHiddenSequence(), new RectangleImage(26*4, 26, OutlineMode.SOLID, Color.black));
     
-    // higher square size:
+    // higher square size and count:
     
     // generic duplicates set random
     Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
+        ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 5,
         20, true, new Random(1));
     
     game.art.dotSquareSide *= 2;
     
-    out |= t.checkExpect(game.art.genHiddenSequence(), new MtLoInt());
+    out |= t.checkExpect(game.art.genHiddenSequence(), new RectangleImage(26*2*5, 26*2, OutlineMode.SOLID, Color.black));
     
     return out;
   }
@@ -948,8 +1068,26 @@ class ExamplesGameArt {
   boolean testGenResultSequence(Tester t) {
     boolean out = true;
     
-    out |= t.checkExpect(blankGame.art.genResultSequence(blankGame.sequence, "Win!"), new MtLoInt());
-    out |= t.checkExpect(blankGame.art.genResultSequence(blankGame.sequence, "Other"), new MtLoInt());
+    // win:
+    
+    WorldImage seqImg = new BesideImage(this.filledDotRed, this.filledDotOrange, this.filledDotWhite,
+        this.filledDotMagenta, new EmptyImage());
+    
+    WorldImage textBG = new RectangleImage(26*2, 26, OutlineMode.SOLID, this.bgColor);
+    
+    WorldImage winImg = new BesideImage(
+        seqImg,
+        new OverlayImage(new TextImage("Win!", 20, Color.white), textBG));
+    
+    out |= t.checkExpect(blankGame.art.genResultSequence(ConsLoInt.gen(3, 2, 1, 0), "Win!"), winImg);
+    
+    // other:
+    
+    WorldImage otherImg = new BesideImage(
+        seqImg,
+        new OverlayImage(new TextImage("Other", 20, Color.white), textBG));
+    
+    out |= t.checkExpect(blankGame.art.genResultSequence(ConsLoInt.gen(3, 2, 1, 0), "Other"), otherImg);
     
     return out;
   }
@@ -958,15 +1096,17 @@ class ExamplesGameArt {
     boolean out = true;
     
     // 4 colors
-    out |= t.checkExpect(blankGame.art.genAvailableColorsIMG(), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genAvailableColorsIMG(),
+        this.colorPallette);
     
-    // 6 colors
+    // 2 colors
     // generic duplicates set random
     Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray, Color.magenta, Color.yellow), 4,
+        ConsLoColor.gen(Color.red, Color.magenta), 4,
         20, true, new Random(1));
     
-    out |= t.checkExpect(game.art.genAvailableColorsIMG(), new MtLoInt());
+    out |= t.checkExpect(game.art.genAvailableColorsIMG(),
+        new BesideImage (new BesideImage(new EmptyImage(), this.filledDotRed), this.filledDotMagenta));
     
     return out;
   }
@@ -979,9 +1119,30 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game.art.updateGuessSlots(ConsLoInt.gen(1, 1, 1, 1));
+    game.art.updateGuessSlots(ConsLoInt.gen(0, 0, 0, 0));
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    out |= t.checkExpect(game.art.guessSlots, new OverlayOffsetAlign(
+        AlignModeX.LEFT,
+        AlignModeY.BOTTOM,
+        new BesideImage(
+            this.filledDotRed,
+            this.filledDotRed,
+            this.filledDotRed,
+            this.filledDotRed,
+            new EmptyImage()),
+        0, 0,
+        new AboveImage(
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            new EmptyImage())));
     
     return out;
   }
@@ -996,9 +1157,30 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game.art.updateGuessImage(game.art.genColorList(ConsLoInt.gen(1, 1, 1, 1), 0));
+    game.art.updateGuessImage(game.art.genColorList(ConsLoInt.gen(0, 0, 0, 0), 0));
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    out |= t.checkExpect(game.art.guessSlots, new OverlayOffsetAlign(
+        AlignModeX.LEFT,
+        AlignModeY.BOTTOM,
+        new BesideImage(
+            this.filledDotRed,
+            this.filledDotRed,
+            this.filledDotRed,
+            this.filledDotRed,
+            new EmptyImage()),
+        0, 0,
+        new AboveImage(
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            new EmptyImage())));
     
     // other image, different guessLine
     
@@ -1007,11 +1189,27 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game2.numGuesses = 5;
+    game2.art.numGuesses = 5;
     
     game2.art.updateGuessImage(new CircleImage(10, OutlineMode.SOLID, Color.BLUE));
     
-    out |= t.checkExpect(game2.art.produceImage(), new MtLoInt());
+    out |= t.checkExpect(game2.art.guessSlots, new OverlayOffsetAlign(
+        AlignModeX.LEFT,
+        AlignModeY.BOTTOM,
+        new CircleImage(10, OutlineMode.SOLID, Color.BLUE),
+        0, 26 * 5,
+        new AboveImage(
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            new EmptyImage())));
     
     return out;
   }
@@ -1020,14 +1218,29 @@ class ExamplesGameArt {
     boolean out = true;
     
     // generic
-    out |= t.checkExpect(blankGame.art.genInitGuessSlots(), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genInitGuessSlots(), new AboveImage(
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        new EmptyImage()));
     
     // small game
+    
+    WorldImage threeEmptyDots = new BesideImage(this.emptyDot, this.emptyDot, this.emptyDot, new EmptyImage());
+    
     Game shortGame = new Game(
         ConsLoColor.gen(Color.red, Color.orange, Color.magenta), 3,
-        4, true);
+        3, true);
     
-    out |= t.checkExpect(shortGame.art.genInitGuessSlots(), new MtLoInt());
+    out |= t.checkExpect(shortGame.art.genInitGuessSlots(),
+        new AboveImage(threeEmptyDots, threeEmptyDots, threeEmptyDots, new EmptyImage()));
     
     return out;
   }
@@ -1040,7 +1253,18 @@ class ExamplesGameArt {
     out |= t.checkExpect(blankGame.art.doGenInitGuessSlots(
         blankGame.art.screenGuesses, 
         new EmptyImage(),
-        emptySlots), new MtLoInt());
+        emptySlots), new AboveImage(
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            this.fourEmptyDots,
+            new EmptyImage()));
     
     return out;
   }
@@ -1053,10 +1277,15 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game.guess = ConsLoInt.gen(1, 1, 1, 1);
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square1 = new OverlayImage(new TextImage("1", 20, Color.white), square);
+    WorldImage square4 = new OverlayImage(new TextImage("4", 20, Color.white), square);
     
-    out |= t.checkExpect(game.art.genGuessResult(1, 1), new MtLoInt());
-    out |= t.checkExpect(game.art.genGuessResult(4, 2), new MtLoInt());
+    WorldImage res1 = new BesideImage(square1, square1);
+    WorldImage res2 = new BesideImage(square4, square1);
+    
+    out |= t.checkExpect(game.art.genGuessResult(1, 1), res1);
+    out |= t.checkExpect(game.art.genGuessResult(4, 1), res2);
     
     return out;
   }
@@ -1065,9 +1294,14 @@ class ExamplesGameArt {
     boolean out = true;
     
     // generic color list
-    ILoColor cols = ConsLoColor.gen(Color.red, Color.black, Color.green, Color.white);
+    ILoColor cols = ConsLoColor.gen(Color.red, Color.orange, Color.white, Color.magenta);
     
-    out |= t.checkExpect(blankGame.art.genColorList(cols), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genColorList(cols),
+        new BesideImage(
+            new BesideImage(
+                new BesideImage(
+                    new BesideImage(new EmptyImage(), this.filledDotRed)
+                      , this.filledDotOrange), this.filledDotWhite), this.filledDotMagenta));
     
     // empty color list
     out |= t.checkExpect(blankGame.art.genColorList(new MtLoColor()), new EmptyImage());
@@ -1079,17 +1313,20 @@ class ExamplesGameArt {
     boolean out = true;
     
     // generic color list
-    ILoInt cols = ConsLoInt.gen(0, 1, 2, 3);
+    ILoInt cols = ConsLoInt.gen(3, 2, 1, 0);
     
     // full
-    out |= t.checkExpect(blankGame.art.genColorList(cols, 0), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genColorList(cols, 4), 
+        new BesideImage(this.filledDotRed, this.filledDotOrange, this.filledDotWhite, this.filledDotMagenta, new EmptyImage()));
     
     // with empty slots
-    out |= t.checkExpect(blankGame.art.genColorList(cols, 3), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genColorList(cols, 8),
+        new BesideImage(this.filledDotRed, this.filledDotOrange, this.filledDotWhite, this.filledDotMagenta,
+            this.fourEmptyDots));
     
     // empty color list
     out |= t.checkExpect(blankGame.art.genColorList(new MtLoInt(), 0), new EmptyImage());
-    out |= t.checkExpect(blankGame.art.genColorList(new MtLoInt(), 3), new MtLoInt());
+    out |= t.checkExpect(blankGame.art.genColorList(new MtLoInt(), 4), this.fourEmptyDots);
     
     return out;
   }
@@ -1101,10 +1338,10 @@ class ExamplesGameArt {
     out |= t.checkExpect(blankGame.art.genEmptyDotsBeside(0, new EmptyImage()), new EmptyImage());
     
     // 1 dot
-    out |= t.checkExpect(blankGame.art.genEmptyDotsBeside(1, new EmptyImage()), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genEmptyDotsBeside(1, new EmptyImage()), new BesideImage(this.emptyDot, new EmptyImage()));
     
     // several dots
-    out |= t.checkExpect(blankGame.art.genEmptyDotsBeside(4, new EmptyImage()), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genEmptyDotsBeside(4, new EmptyImage()), this.fourEmptyDots);
     
     return out;
   }
@@ -1113,10 +1350,10 @@ class ExamplesGameArt {
     boolean out = true;
     
     // red
-    out |= t.checkExpect(blankGame.art.genFilledDot(Color.red), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genFilledDot(Color.red), this.filledDotRed);
     
     // white
-    out |= t.checkExpect(blankGame.art.genFilledDot(Color.white), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genFilledDot(Color.white), this.filledDotWhite);
     
     return out;
   }
@@ -1125,10 +1362,10 @@ class ExamplesGameArt {
     boolean out = true;
     
     // 0 color
-    out |= t.checkExpect(blankGame.art.genFilledDot(0), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genFilledDot(0), this.filledDotRed);
     
     // 1 color
-    out |= t.checkExpect(blankGame.art.genFilledDot(1), new EmptyImage());
+    out |= t.checkExpect(blankGame.art.genFilledDot(1), this.filledDotOrange);
     
     return out;
   }
@@ -1164,7 +1401,7 @@ class ExamplesGameArt {
     game.guessLength = 4;
     game.submitGuess();
     
-    t.checkExpect(game.art.calcGuessLine(), game.art.dotSquareSide);
+    t.checkExpect(game.art.calcGuessLine(), 1);
     
     // guess nine case
     for (int i = 0; i < 7; i++) {
@@ -1173,14 +1410,14 @@ class ExamplesGameArt {
       game.submitGuess();
     }
     
-    t.checkExpect(game.art.calcGuessLine(), game.art.dotSquareSide * 8);
+    t.checkExpect(game.art.calcGuessLine(), 8);
     
     // guess ten case (scrolling)
     game.guess = ConsLoInt.gen(1, 1, 1, 1);
     game.guessLength = 4;
     game.submitGuess();
     
-    t.checkExpect(game.art.calcGuessLine(), game.art.dotSquareSide * 8);
+    t.checkExpect(game.art.calcGuessLine(), 8);
     
     // guess 20 case (stop scrolling)
     for (int i = 0; i < 10; i++) {
@@ -1189,7 +1426,7 @@ class ExamplesGameArt {
       game.submitGuess();
     }
     
-    t.checkExpect(game.art.calcGuessLine(), game.art.dotSquareSide * 9);
+    t.checkExpect(game.art.calcGuessLine(), 9);
     
     // guess 21 case (return down to indicate not to scroll)
     for (int i = 0; i < 10; i++) {
@@ -1198,7 +1435,7 @@ class ExamplesGameArt {
       game.submitGuess();
     }
     
-    t.checkExpect(game.art.calcGuessLine(), game.art.dotSquareSide * 8);
+    t.checkExpect(game.art.calcGuessLine(), 8);
     
     return out;
   }
