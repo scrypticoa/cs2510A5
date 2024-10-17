@@ -344,7 +344,6 @@ class Game extends World {
       
       WorldImage screen = new AboveAlignImage(
           AlignModeX.LEFT,
-          new EmptyImage(),
           this.hiddenSequence,
           this.guessSlots,
           this.availableColorsIMG);
@@ -630,7 +629,8 @@ class ExamplesGame {
     Game game = new Game(
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 8,
         20, true, new Random(1));
-    out |= t.checkExpect(game.genSequenceDuplicates(8, new MtLoInt()), new MtLoInt());
+    out |= t.checkExpect(game.genSequenceDuplicates(8, new MtLoInt()),
+        ConsLoInt.gen(2, 3, 0, 3, 0, 0, 2, 3));
     
     return out;
   }
@@ -642,7 +642,8 @@ class ExamplesGame {
     Game game2 = new Game(
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, false, new Random(1));
-    out |= t.checkExpect(game2.genSequenceNoDuplicates(4, new MtLoInt(), ""), new MtLoInt());
+    out |= t.checkExpect(game2.genSequenceNoDuplicates(4, new MtLoInt(), ""),
+        ConsLoInt.gen(1, 3, 0, 2));
     
     return out;
   }
@@ -652,20 +653,100 @@ class ExamplesGame {
     
     // generic duplicates set random
     Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.white), 3,
-        3, true, new Random(1));
+        ConsLoColor.gen(Color.red, Color.orange, Color.white, Color.magenta), 4,
+        20, true, new Random(1));
+    
+    ExamplesGameArt ega = new ExamplesGameArt();
+    
+    WorldImage hidden = new RectangleImage(26*4, 26, OutlineMode.SOLID, Color.black);
+    WorldImage guessSlots = ega.blankSlots;
+    WorldImage palette = ega.colorPalette;
+    
+    WorldImage screen = new AboveAlignImage(
+        AlignModeX.LEFT,
+        hidden,
+        guessSlots,
+        palette);
+    Double screenHeight = Math.ceil(screen.getHeight());
+    
+    screen = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        screen, 0, 0,
+        new RectangleImage(
+            game.art.width, screenHeight.intValue(),
+            OutlineMode.SOLID, ega.bgColor));
+    
+    WorldScene worldScene = new WorldScene(game.art.width, game.art.height);
+    worldScene = worldScene.placeImageXY(screen, game.art.width / 2, game.art.height / 2);
     
     // initial blank scene:
-    out |= t.checkExpect(game.makeScene(), new MtLoInt());
+    out |= t.checkExpect(game.makeScene(), worldScene);
     
     // after inputting a guess:
-    game.addGuess(1);
-    game.addGuess(1);
-    game.addGuess(1);
-    game.addGuess(1);
+    game.addGuess(0);
+    game.addGuess(0);
+    game.addGuess(0);
+    game.addGuess(0);
     game.submitGuess();
     
-    out |= t.checkExpect(game.makeScene(), new MtLoInt());
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(ega.filledDotRed, ega.emptyDot, ega.emptyDot, ega.emptyDot, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(ega.filledDotRed, ega.filledDotRed, ega.emptyDot, ega.emptyDot, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(ega.filledDotRed, ega.filledDotRed, ega.filledDotRed, ega.emptyDot, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(ega.filledDotRed, ega.filledDotRed, ega.filledDotRed, ega.filledDotRed, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    WorldImage seqImg = new BesideImage(ega.filledDotRed, ega.filledDotRed, ega.filledDotRed, ega.filledDotRed, new EmptyImage());
+    
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square0 = new OverlayImage(new TextImage("0", 20, Color.white), square);
+    WorldImage square1 = new OverlayImage(new TextImage("1", 20, Color.white), square);
+    
+    WorldImage res1 = new BesideImage(square1, square0);
+    
+    WorldImage  guessIMG = new BesideImage(seqImg, res1);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        guessIMG,
+        0, 0,
+        guessSlots);
+    
+    screen = new AboveAlignImage(
+        AlignModeX.LEFT,
+        hidden,
+        guessSlots,
+        palette);
+    screenHeight = Math.ceil(screen.getHeight());
+    
+    screen = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        screen, 0, 0,
+        new RectangleImage(
+            game.art.width, screenHeight.intValue(),
+            OutlineMode.SOLID, ega.bgColor));
+    
+    worldScene = new WorldScene(game.art.width, game.art.height);
+    worldScene = worldScene.placeImageXY(screen, game.art.width / 2, game.art.height / 2);
+    
+    out |= t.checkExpect(game.makeScene(), worldScene);
     
     return out;
   }
@@ -685,7 +766,7 @@ class ExamplesGame {
     // number key in range
     game.onKeyEvent("2");
     out |= t.checkExpect(game.guessLength, 1);
-    out |= t.checkExpect(game.guess, ConsLoInt.gen(2));
+    out |= t.checkExpect(game.guess, ConsLoInt.gen(1));
     
     // delete 
     game.onKeyEvent("delete");
@@ -699,9 +780,9 @@ class ExamplesGame {
     game.onKeyEvent("2");
     
     // full guess number keys
-    game.onKeyEvent("1");
+    game.onKeyEvent("3");
     out |= t.checkExpect(game.guessLength, 4);
-    out |= t.checkExpect(game.guess, ConsLoInt.gen(2, 2, 2, 2));
+    out |= t.checkExpect(game.guess, ConsLoInt.gen(1, 1, 1, 1));
     
     // enter
     game.onKeyEvent("enter");
@@ -811,7 +892,9 @@ class ExamplesGameArt {
   
   WorldImage fourEmptyDots;
   
-  WorldImage colorPallette;
+  WorldImage colorPalette;
+  
+  WorldImage blankSlots;
   
   public ExamplesGameArt() {
     this.bgColor = new Color(120, 0, 10);
@@ -850,7 +933,7 @@ class ExamplesGameArt {
     
     this.fourEmptyDots = new BesideImage(this.emptyDot, this.emptyDot, this.emptyDot, this.emptyDot, new EmptyImage());
     
-    this.colorPallette =
+    this.colorPalette =
         new BesideImage( 
             new BesideImage(
                 new BesideImage(
@@ -859,6 +942,19 @@ class ExamplesGameArt {
                     this.filledDotOrange), 
                 this.filledDotWhite), 
             this.filledDotMagenta);
+    
+    this.blankSlots = new AboveImage(
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        this.fourEmptyDots,
+        new EmptyImage());
   }
   
   
@@ -901,23 +997,116 @@ class ExamplesGameArt {
     
     // generic duplicates set random
     Game game = new Game(
-        ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
+        ConsLoColor.gen(Color.red, Color.orange, Color.white, Color.magenta), 4,
         20, true, new Random(1));
     
+    WorldImage hidden = new RectangleImage(26*4, 26, OutlineMode.SOLID, Color.black);
+    WorldImage guessSlots = this.blankSlots;
+    WorldImage palette = this.colorPalette;
+    
+    WorldImage screen = new AboveAlignImage(
+        AlignModeX.LEFT,
+        hidden,
+        guessSlots,
+        palette);
+    Double screenHeight = Math.ceil(screen.getHeight());
+    
+    screen = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        screen, 0, 0,
+        new RectangleImage(
+            game.art.width, screenHeight.intValue(),
+            OutlineMode.SOLID, this.bgColor));
+    
+    WorldScene worldScene = new WorldScene(game.art.width, game.art.height);
+    worldScene = worldScene.placeImageXY(screen, game.art.width / 2, game.art.height / 2);
+    
     // starting scene
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    out |= t.checkExpect(game.art.produceImage(), worldScene);
     
     // guess partially entered
     game.addGuess(0);
     game.addGuess(1);
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+   
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(this.filledDotRed, this.emptyDot, this.emptyDot, this.emptyDot, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(this.filledDotRed, this.filledDotOrange, this.emptyDot, this.emptyDot, new EmptyImage()),
+        0, 0,
+        guessSlots);
+    
+    screen = new AboveAlignImage(
+        AlignModeX.LEFT,
+        hidden,
+        guessSlots,
+        palette);
+    screenHeight = Math.ceil(screen.getHeight());
+    
+    screen = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        screen, 0, 0,
+        new RectangleImage(
+            game.art.width, screenHeight.intValue(),
+            OutlineMode.SOLID, this.bgColor));
+    
+    worldScene = new WorldScene(game.art.width, game.art.height);
+    worldScene = worldScene.placeImageXY(screen, game.art.width / 2, game.art.height / 2);
+    
+    out |= t.checkExpect(game.art.produceImage(), worldScene);
     
     // win scene
     game.guess = game.sequence;
     game.guessLength = game.sequenceLength;
     game.submitGuess();
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    WorldImage seqImg = new BesideImage(this.filledDotWhite, this.filledDotRed, this.filledDotOrange, this.filledDotOrange, new EmptyImage());
+    
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square0 = new OverlayImage(new TextImage("0", 20, Color.white), square);
+    WorldImage square4 = new OverlayImage(new TextImage("4", 20, Color.white), square);
+    
+    WorldImage res1 = new BesideImage(square4, square0);
+    
+    WorldImage  trueGuessIMG = new BesideImage(seqImg, res1);
+    
+    guessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        trueGuessIMG,
+        0, 0,
+        guessSlots);
+    
+    WorldImage winImg = new BesideImage(this.filledDotWhite, this.filledDotRed, this.filledDotOrange,
+        this.filledDotOrange, new EmptyImage());
+    
+    WorldImage textBG = new RectangleImage(26*2, 26, OutlineMode.SOLID, this.bgColor);
+    
+    winImg = new BesideImage(
+        winImg,
+        new OverlayImage(new TextImage("Win!", 20, Color.white), textBG));
+    
+    screen = new AboveAlignImage(
+        AlignModeX.LEFT,
+        winImg,
+        guessSlots,
+        palette);
+    screenHeight = Math.ceil(screen.getHeight());
+    
+    screen = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        screen, 0, 0,
+        new RectangleImage(
+            game.art.width, screenHeight.intValue(),
+            OutlineMode.SOLID, this.bgColor));
+    
+    worldScene = new WorldScene(game.art.width, game.art.height);
+    worldScene = worldScene.placeImageXY(screen, game.art.width / 2, game.art.height / 2);
+    
+    out |= t.checkExpect(game.art.produceImage(), worldScene);
     
     return out;
   }
@@ -930,9 +1119,33 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game.art.submitFalseGuess(ConsLoInt.gen(1,1,1,1), 2, 0);
+    WorldImage fourRedDots = new BesideImage(this.filledDotRed, this.filledDotRed,
+        this.filledDotRed, this.filledDotRed, new EmptyImage());
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square0 = new OverlayImage(new TextImage("0", 20, Color.white), square);
+    WorldImage square2 = new OverlayImage(new TextImage("2", 20, Color.white), square);
+    
+    WorldImage res1 = new BesideImage(square2, square0);
+    
+    WorldImage startGuessSlots = this.blankSlots;
+    
+    startGuessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(fourRedDots, res1),
+        0, 0,
+        startGuessSlots);
+    
+    game.art.submitFalseGuess(ConsLoInt.gen(0,0,0,0), 2, 0);
+    
+    out |= t.checkExpect(game.art.guessSlots, startGuessSlots);
+    out |= t.checkFail(game.art.hiddenSequence, game.art.loseSequenceIMG);
+    
+    // when last guess
+    
+    game.art.numGuesses = 19;
+    game.art.submitFalseGuess(ConsLoInt.gen(0,0,0,0), 2, 0);
+    out |= t.checkExpect(game.art.hiddenSequence, game.art.loseSequenceIMG);
     
     return out;
   }
@@ -945,9 +1158,27 @@ class ExamplesGameArt {
         ConsLoColor.gen(Color.red, Color.blue, Color.white, Color.gray), 4,
         20, true, new Random(1));
     
-    game.art.submitCorrectGuess(game.sequence, 4, 0);
+    WorldImage fourRedDots = new BesideImage(this.filledDotRed, this.filledDotRed,
+        this.filledDotRed, this.filledDotRed, new EmptyImage());
     
-    out |= t.checkExpect(game.art.produceImage(), new MtLoInt());
+    WorldImage square = new RectangleImage(26, 26, OutlineMode.SOLID, new Color(120, 0, 10));
+    WorldImage square0 = new OverlayImage(new TextImage("0", 20, Color.white), square);
+    WorldImage square4 = new OverlayImage(new TextImage("4", 20, Color.white), square);
+    
+    WorldImage res1 = new BesideImage(square4, square0);
+    
+    WorldImage startGuessSlots = this.blankSlots;
+    
+    startGuessSlots = new OverlayOffsetAlign(
+        AlignModeX.LEFT, AlignModeY.BOTTOM,
+        new BesideImage(fourRedDots, res1),
+        0, 0,
+        startGuessSlots);
+    
+    game.art.submitCorrectGuess(ConsLoInt.gen(0, 0, 0, 0), 4, 0);
+    
+    out |= t.checkExpect(game.art.guessSlots, startGuessSlots);
+    out |= t.checkExpect(game.art.hiddenSequence, game.art.winSequenceIMG);
     
     return out;
   }
@@ -973,18 +1204,7 @@ class ExamplesGameArt {
             this.filledDotRed,
             threeEmptyDots),
         0, 26,
-        new AboveImage(
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            new EmptyImage())));
+        this.blankSlots));
     
     // scrolling functionality:
     
@@ -1014,17 +1234,7 @@ class ExamplesGameArt {
     
     WorldImage guessSubRes = new BesideImage(fourRedDots, squares);
     
-    WorldImage img = new AboveImage(
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots, new EmptyImage());
+    WorldImage img = this.blankSlots;
     
     for (int i = 0; i < 8; i++) {
       img = new OverlayOffsetAlign(AlignModeX.LEFT, AlignModeY.BOTTOM,
@@ -1098,7 +1308,7 @@ class ExamplesGameArt {
     
     // 4 colors
     out |= t.checkExpect(blankGame.art.genAvailableColorsIMG(),
-        this.colorPallette);
+        this.colorPalette);
     
     // 2 colors
     // generic duplicates set random
@@ -1132,18 +1342,7 @@ class ExamplesGameArt {
             this.filledDotRed,
             new EmptyImage()),
         0, 0,
-        new AboveImage(
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            new EmptyImage())));
+        this.blankSlots));
     
     return out;
   }
@@ -1170,18 +1369,7 @@ class ExamplesGameArt {
             this.filledDotRed,
             new EmptyImage()),
         0, 0,
-        new AboveImage(
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            new EmptyImage())));
+        this.blankSlots));
     
     // other image, different guessLine
     
@@ -1199,18 +1387,7 @@ class ExamplesGameArt {
         AlignModeY.BOTTOM,
         new CircleImage(10, OutlineMode.SOLID, Color.BLUE),
         0, 26 * 5,
-        new AboveImage(
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            new EmptyImage())));
+        this.blankSlots));
     
     return out;
   }
@@ -1219,18 +1396,7 @@ class ExamplesGameArt {
     boolean out = true;
     
     // generic
-    out |= t.checkExpect(blankGame.art.genInitGuessSlots(), new AboveImage(
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        this.fourEmptyDots,
-        new EmptyImage()));
+    out |= t.checkExpect(blankGame.art.genInitGuessSlots(), this.blankSlots);
     
     // small game
     
@@ -1254,18 +1420,7 @@ class ExamplesGameArt {
     out |= t.checkExpect(blankGame.art.doGenInitGuessSlots(
         blankGame.art.screenGuesses, 
         new EmptyImage(),
-        emptySlots), new AboveImage(
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            this.fourEmptyDots,
-            new EmptyImage()));
+        emptySlots), this.blankSlots);
     
     return out;
   }
