@@ -6,15 +6,22 @@ interface ILoInt{
   //add 1 to the int at position pos
   ILoInt addAtPos(int pos);
   
+  //adds a int to the front of the list
   ILoInt insert(int num);
   
+  //removes the first int in the list
   ILoInt remove();
   
+  //creates a copy the list
   ILoInt clone();
   
+  //starts the comparison of 2 lists
   Result compare(ILoInt other, Game game);
+  //helper to find the first of the other list
   Result comparePass(ILoInt other, Game game, Result result);
+  //compares two list to find exact and inexact matches
   Result doCompare(ILoInt other, Game game, Result result, int num);
+  
   //finds sum of list
   int sum();
   
@@ -25,78 +32,99 @@ interface ILoInt{
   // generates the minimum for the current index
   ILoInt doMins(int otherFirst, ILoInt otherRest);
   
+  //finds the length of a list
   int calcLength();
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   <T> T fold(T initial, BiFunction<T, Integer, T> folder);
   
+  //puts the list into a string in order
   String print();
 }
 
 class MtLoInt implements ILoInt{
   /*TEMPLATE:
    * METHODS:
-   * addAtPos(int pos) ... ILoInt
-   * insert(int num) ... ILoInt
-   * remove() ... ILoInt
-   * clone() ... ILoInt
-   * compare(ILoInt other, Game game) ... Result
-   * comparePass(ILoInt other, Game game, Result result) ... Result
-   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
-   * sum() ... int
-   * mins(ILoInt list) ... ILoInt
-   * doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * this.addAtPos(int pos) ... ILoInt
+   * this.insert(int num) ... ILoInt
+   * this.remove() ... ILoInt
+   * this.clone() ... ILoInt
+   * this.compare(ILoInt other, Game game) ... Result
+   * this.comparePass(ILoInt other, Game game, Result result) ... Result
+   * this.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * this.sum() ... int
+   * this.mins(ILoInt list) ... ILoInt
+   * this.doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * this.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * this.print() ... String
    */
   
+  //add 1 to the int at position pos
   public ILoInt addAtPos(int pos) {
     throw new IndexOutOfBoundsException();
   }
   
+  //adds a int to the front of the list
   public ILoInt insert(int num) {
     return new ConsLoInt(num, new MtLoInt());
   }
   
+  //removes the first int in the list
   public ILoInt remove() {
     return new MtLoInt();
   }
   
+  //creates a copy the list
   public ILoInt clone() {
     return new MtLoInt();
   }
   
+  //starts the comparison of 2 lists
   public Result compare(ILoInt other, Game game) {
     return game.genBlankResult();
     // error
   }
   
+  //helper to find the first of the other list
   public Result comparePass(ILoInt other, Game game, Result result) {
     return result;
   }
   
+  //compares two list to find exact and inexact matches
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     return game.genBlankResult();
     // error
   }
-
+  //finds sum of list
   public int sum() {
     return 0;
   }
   
+  //returns the minimum at each index between this and list, stopping when either list
+  // ends, passes this first value to the compared list
   public ILoInt mins(ILoInt list) {
     return new MtLoInt();
   }
 
+  //helper for mins, which receives the other compared list's first value, and
+  // generates the minimum for the current index
   public ILoInt doMins(int otherFirst, ILoInt otherRest) {
     return new MtLoInt();
   }
   
+  //finds the lenght of a list
   public int calcLength() {
     return 0;
   }
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
     return initial;
   }
   
+  //puts the list into a string in order
   public String print() {
     return "";
   }
@@ -133,19 +161,23 @@ class ConsLoInt implements ILoInt{
    * FIELDS:
    * this.first ... int
    * this.rest ... ILoInt
+   * 
    * METHODS:
-   * addAtPos(int pos) ... ILoInt
-   * insert(int num) ... ILoInt
-   * remove() ... ILoInt
-   * clone() ... ILoInt
-   * compare(ILoInt other, Game game) ... Result
-   * comparePass(ILoInt other, Game game, Result result) ... Result
-   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
-   * sum() ... int
-   * mins(ILoInt list) ... ILoInt
-   * minsCompare(int otherFirst) ... int
-   * minsRHelp(ILoInt list) ... ILoint
-   * METHODS OF FIELDS
+   * this.addAtPos(int pos) ... ILoInt
+   * this.insert(int num) ... ILoInt
+   * this.remove() ... ILoInt
+   * this.clone() ... ILoInt
+   * this.compare(ILoInt other, Game game) ... Result
+   * this.comparePass(ILoInt other, Game game, Result result) ... Result
+   * this.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * this.sum() ... int
+   * this.mins(ILoInt list) ... ILoInt
+   * this.minsCompare(int otherFirst) ... int
+   * this.minsRHelp(ILoInt list) ... ILoint
+   * this.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * this.print() ... String
+   * 
+   * METHODS OF FIELDS:
    * rest.addAtPos(int pos) ... ILoInt
    * rest.insert(int num) ... ILoInt
    * rest.remove() ... ILoInt
@@ -157,8 +189,11 @@ class ConsLoInt implements ILoInt{
    * rest.mins(ILoInt list) ... ILoInt
    * rest.minsCompare(int otherFirst) ... int
    * rest.minsRHelp(ILoInt list) ... ILoint
+   * rest.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * rest.print() ... String
    */
   
+  //adds one to the given pos
   public ILoInt addAtPos(int pos) {
     if(pos == 0){
       return new ConsLoInt(this.first + 1, this.rest.clone());
@@ -166,27 +201,33 @@ class ConsLoInt implements ILoInt{
     return new ConsLoInt(this.first, this.rest.addAtPos(pos-1));
   }
   
+  //adds a int to the front of the list
   public ILoInt insert(int num) {
     return new ConsLoInt(num, this.clone());
   }
   
+  //removes the first int in the list
   public ILoInt remove() {
     return this.rest.clone();
   }
   
+  //creates a copy the list
   public ILoInt clone() {
     return new ConsLoInt(this.first, this.rest.clone());
   }
   
+  //starts the comparison of 2 lists
   public Result compare(ILoInt other, Game game) {
     Result result = game.genBlankResult();
     return this.comparePass(other, game, result);
   }
   
+  //helper to find the first of the other list
   public Result comparePass(ILoInt other, Game game, Result result) {
     return other.doCompare(this.rest, game, result, this.first);
   }
   
+  //compares two list to find exact and inexact matches
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     if (num == this.first) {
       result.addExact();
@@ -198,28 +239,37 @@ class ConsLoInt implements ILoInt{
     return other.comparePass(this.rest, game, result);
   }
 
+  //finds the sum of the list
   public int sum() {
     return this.first + this.rest.sum();
   }
   
+  //returns the minimum at each index between this and list, stopping when either list
+  // ends, passes this first value to the compared list
   public ILoInt mins(ILoInt list) {
     return list.doMins(this.first, this.rest);
   }
 
+  //helper for mins, which receives the other compared list's first value, and
+   // generates the minimum for the current index
   public ILoInt doMins(int otherFirst, ILoInt otherRest) {
     return new ConsLoInt(Math.min(this.first, otherFirst), otherRest.mins(this.rest));
   }
   
+  // finds the lenght of a list
   public int calcLength() {
     return 1 + this.rest.calcLength();
   }
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
     return this.rest.fold(
         folder.apply(initial, this.first), 
         folder);
   }
   
+  //puts the list into a string in order
   public String print() {
     return this.first + this.rest.print();
   }

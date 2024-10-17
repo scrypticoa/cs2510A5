@@ -52,6 +52,87 @@ class Game extends World {
     this(gameColors, sequenceLength, attemptCount, duplicatesAllowed, new Random());
   }
   
+  /* TEMPLATE:
+   * 
+   * FIELDS:
+   * this.art ... GameArt
+   * this.finished ... boolean
+   * this.sequence ... ILoInt
+   * this.rand ... Random
+   * this.guess ... ILoInt
+   * this.guessLenght ... int
+   * this.numGuesses ... int
+   * this.numColors ... int
+   * this.gameColors ... ILoColor
+   * this.sequencelLength ... int
+   * this.duplicatesAllowed ... boolean
+   * 
+   * METHODS:
+   * this.validate() ... void
+   * this.genSequence() ... ILoInt
+   * this.genSequenceDuplicates(int length, ILoInt seq) ... ILoInt
+   * this.genSequenceNoDuplicates(int length, ILoInt seq, String seen) ... ILoInt
+   * this.startGame() ... boolean
+   * this.makeScene() ... WorldScene
+   * this.onKeyEvent(String key) ... Game
+   * this.genBlankResult() ... Result
+   * this.addGuess(int color) ... void
+   * this.removeGuess() ... void
+   * this.submitGuess() ... void
+   * 
+   * METHODS OF FIELDS:
+   * art.doBigBang(Game game) ... boolean
+   * art.produceImage() ... WolrdScene
+   * art.submitFalseGuess(ILoInt guess, int exact, int inexact) ... void
+   * art.prepareNextGuess() ... void
+   * art.genHiddenSequence() ... WorldImage
+   * art.genSequence() ... WorldImage
+   * art.genAvailableColorsIMG() ... WorldImage
+   * art.updateGuessSlots(ILoInt guess) ... void
+   * art.updateGuessImage(WorldImage image) ... void
+   * art.genInitGuessSlots() ... WorldImage
+   * art.doGenInitGuessSlots(int length, WorldImage img, WorldImage slots) ... WorldImage
+   * art.genGuessResult(int exact, int inexact) ... WorldImage
+   * art.genColorList(ILoColor colList) ... WorldImage
+   * art.genColorList(ILoInt colList, int numSlots) ... WorldImage
+   * art.genEmptyDotsBeside(int length, WorldImage img) ... WorldImage
+   * art.genFilledDot(Color col) ... WorldImage
+   * art.genFilledDot(int index) ... WorldImage
+   * art.getColor(int index) ... Color
+   * art.calcGuessLine() ... int
+   * 
+   * sequence.addAtPos(int pos) ... ILoInt
+   * sequence.insert(int num) ... ILoInt
+   * sequence.remove() ... ILoInt
+   * sequence.clone() ... ILoInt
+   * sequence.compare(ILoInt other, Game game) ... Result
+   * sequence.comparePass(ILoInt other, Game game, Result result) ... Result
+   * sequence.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * sequence.sum() ... int
+   * sequence.mins(ILoInt list) ... ILoInt
+   * sequence.doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * sequence.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * sequence.print() ... String
+   * 
+   * guess.addAtPos(int pos) ... ILoInt
+   * guess.insert(int num) ... ILoInt
+   * guess.remove() ... ILoInt
+   * guess.clone() ... ILoInt
+   * guess.compare(ILoInt other, Game game) ... Result
+   * guess.comparePass(ILoInt other, Game game, Result result) ... Result
+   * guess.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * guess.sum() ... int
+   * guess.mins(ILoInt list) ... ILoInt
+   * guess.doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * guess.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * guess.print() ... String
+   * 
+   * gameColors.calcLength() ... int
+   * gameColors.get(int index) ... Color
+   * gameColors.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+   */
+  
+  
   void validate() {
     if (this.sequenceLength < 1) throw new IllegalArgumentException();
     if (this.maxGuesses < 1) throw new IllegalArgumentException();
@@ -82,13 +163,11 @@ class Game extends World {
   boolean startGame() {
     return art.doBigBang(this);
   }
-  
-  @Override
+
   public WorldScene makeScene() {
     return art.produceImage();
   }
   
-  @Override
   public Game onKeyEvent(String key) {
     if (this.finished) return this;
     String nums = "123456789";
@@ -208,8 +287,56 @@ class Game extends World {
       this.width = dWidth.intValue();
     }
     
+    /* TEMPLATE:
+     * 
+     * FIELDS:
+     * this.colors ... ILoColor
+     * this.height ... int
+     * this.maxGuesses ... int
+     * this.numGuesses ... int
+     * this.screenGuesses ... int
+     * this.sequenceLength ... int
+     * this.availableColorsIMG ... WorldImage
+     * this.guessSlots ... WorldImage
+     * this.winSequenceIMG ... WorldImage
+     * this.loseSequenceIMG  ... WorldImage
+     * this.hiddenSequence ... WorldImage
+     * this.dotSquareSide ... int
+     * this.dotRadiusGap ... int
+     * this.bgColor ... Color
+     * this.outlineColor ... Color
+     * this.gameWidth ... double
+     * this.emptyDot ... WorldImage
+     * 
+     * METHODS:
+     * this.doBigBang(Game game) ... boolean
+     * this.produceImage() ... WolrdScene
+     * this.submitFalseGuess(ILoInt guess, int exact, int inexact) ... void
+     * this.prepareNextGuess() ... void
+     * this.genHiddenSequence() ... WorldImage
+     * this.genSequence() ... WorldImage
+     * this.genAvailableColorsIMG() ... WorldImage
+     * this.updateGuessSlots(ILoInt guess) ... void
+     * this.updateGuessImage(WorldImage image) ... void
+     * this.genInitGuessSlots() ... WorldImage
+     * this.doGenInitGuessSlots(int length, WorldImage img, WorldImage slots) ... WorldImage
+     * this.genGuessResult(int exact, int inexact) ... WorldImage
+     * this.genColorList(ILoColor colList) ... WorldImage
+     * this.genColorList(ILoInt colList, int numSlots) ... WorldImage
+     * this.genEmptyDotsBeside(int length, WorldImage img) ... WorldImage
+     * this.genFilledDot(Color col) ... WorldImage
+     * this.genFilledDot(int index) ... WorldImage
+     * this.getColor(int index) ... Color
+     * calcGuessLine() ... int
+     * 
+     * METHODS OF FIELDS:
+     * colors.calcLength() ... int
+     * colors.get(int index) ... Color
+     * colors.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+     */
+    
     boolean doBigBang(Game game) {
-      return game.bigBang(this.width, this.height, 10);
+      return game.bigBang(this.gameWidth.intValue(), this.height, 10);
     }
     
     WorldScene produceImage() {

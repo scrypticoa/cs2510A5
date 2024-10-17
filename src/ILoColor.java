@@ -1,18 +1,33 @@
 import tester.*;
 import java.util.function.*;
 import java.awt.Color;
-
+//A list of Colors
 interface ILoColor {
+  
+  //calculates length of the list
   int calcLength();
+  
+  //gets the color at an index, starts at 0
   Color get(int index);
+  
   <T> T fold(T initial, BiFunction<T, Color, T> folder);
 }
 
 class MtLoColor implements ILoColor {
+  
+  /* TEMPLATE
+   * METHODS:
+   * this.calcLength() ... int
+   * this.get(int index) ... Color
+   * this.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+   */
+  
+  //calculates length of the list
   public int calcLength() {
     return 0;
   }
   
+  //gets the color at an index, starts at 0
   public Color get(int index) {
     throw new IndexOutOfBoundsException();
   }
@@ -39,10 +54,28 @@ class ConsLoColor implements ILoColor {
     return new ConsLoColor(firstColor, temp);
   }
   
+  /* TEMPLATE
+   * FIELDS: 
+   * this.first ... Color
+   * this.rest ... ILoColor
+   * 
+   * METHODS:
+   * this.calcLength() ... int
+   * this.get(int index) ... Color
+   * this.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+   * 
+   * METHODS OF FIELDS:
+   * rest.calcLength() ... int
+   * rest.get(int index) ... Color
+   * rest.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+   */
+  
+  //calculates length of the list
   public int calcLength() {
     return 1 + this.rest.calcLength();
   }
   
+  //gets the color at an index, starts at 0
   public Color get(int index) {
     if (index == 0) {
       return this.first;
