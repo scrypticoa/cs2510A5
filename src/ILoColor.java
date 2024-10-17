@@ -58,10 +58,12 @@ class ConsLoColor implements ILoColor {
    * FIELDS: 
    * this.first ... Color
    * this.rest ... ILoColor
+   * 
    * METHODS:
    * this.calcLength() ... int
    * this.get(int index) ... Color
    * this.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
+   * 
    * METHODS OF FIELDS:
    * rest.calcLength() ... int
    * rest.get(int index) ... Color

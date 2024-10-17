@@ -46,18 +46,18 @@ interface ILoInt{
 class MtLoInt implements ILoInt{
   /*TEMPLATE:
    * METHODS:
-   * addAtPos(int pos) ... ILoInt
-   * insert(int num) ... ILoInt
-   * remove() ... ILoInt
-   * clone() ... ILoInt
-   * compare(ILoInt other, Game game) ... Result
-   * comparePass(ILoInt other, Game game, Result result) ... Result
-   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
-   * sum() ... int
-   * mins(ILoInt list) ... ILoInt
-   * doMins(int otherFirst, ILoInt otherRest) ... ILoInt
-   * fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
-   * print() ... String
+   * this.addAtPos(int pos) ... ILoInt
+   * this.insert(int num) ... ILoInt
+   * this.remove() ... ILoInt
+   * this.clone() ... ILoInt
+   * this.compare(ILoInt other, Game game) ... Result
+   * this.comparePass(ILoInt other, Game game, Result result) ... Result
+   * this.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * this.sum() ... int
+   * this.mins(ILoInt list) ... ILoInt
+   * this.doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * this.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * this.print() ... String
    */
   
   //add 1 to the int at position pos
@@ -161,6 +161,7 @@ class ConsLoInt implements ILoInt{
    * FIELDS:
    * this.first ... int
    * this.rest ... ILoInt
+   * 
    * METHODS:
    * this.addAtPos(int pos) ... ILoInt
    * this.insert(int num) ... ILoInt
@@ -175,7 +176,8 @@ class ConsLoInt implements ILoInt{
    * this.minsRHelp(ILoInt list) ... ILoint
    * this.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
    * this.print() ... String
-   * METHODS OF FIELDS
+   * 
+   * METHODS OF FIELDS:
    * rest.addAtPos(int pos) ... ILoInt
    * rest.insert(int num) ... ILoInt
    * rest.remove() ... ILoInt

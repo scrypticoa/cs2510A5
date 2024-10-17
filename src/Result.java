@@ -15,12 +15,14 @@ class Result {
    * this.exact ... int
    * this.inexactCount1 ... ILoInt
    * this.inexactCount2 ... ILoInt
+   * 
    * METHODS:
    * this.addExact() ... int
    * this.addInexact1(int pos) ... ILoInt
    * this.addInexact2(int pos) ... ILoInt
    * this.calcInexactCount() ... int
    * this.didWin(int sequenceLength) ... boolean
+   * 
    * METHODS OF FIELDS:
    * inexactCount1.addExact() ... int
    * inexactCount1.addInexact1(int pos) ... ILoInt
