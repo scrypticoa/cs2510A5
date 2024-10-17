@@ -34,7 +34,7 @@ class ConsLoColor implements ILoColor {
     this.rest = rest;
   }
   
-  static ConsLoColor gen(Color firstColor, Color...cols) {
+  static ConsLoColor gen(Color firstColor, Color...cols) { // purely for testing, not used in game logic
     ILoColor temp = new MtLoColor();
     for (int i = cols.length-1; i > -1; i--) {
       temp = new ConsLoColor(cols[i], temp);
@@ -82,7 +82,7 @@ class Game extends World {
   boolean duplicatesAllowed;
   
   public Game(ILoColor gameColors, int sequenceLength,
-      int attemptCount, boolean duplicatesAllowed) {
+      int attemptCount, boolean duplicatesAllowed, Random setRand) {
     this.gameColors = gameColors;
     this.sequenceLength = sequenceLength;
     this.maxGuesses = attemptCount;
@@ -93,13 +93,19 @@ class Game extends World {
     this.guess = new MtLoInt();
     this.guessLength = 0;
     
-    this.rand = new Random();
+    this.rand = setRand;
+    
     this.sequence = this.genSequence();
     System.out.println(sequence.print());
     
     this.art = new GameArt(this);
     
     this.validate();
+  }
+  
+  public Game(ILoColor gameColors, int sequenceLength,
+      int attemptCount, boolean duplicatesAllowed) {
+    this(gameColors, sequenceLength, attemptCount, duplicatesAllowed, new Random());
   }
   
   private void validate() {
@@ -156,7 +162,7 @@ class Game extends World {
         submitGuess();
       }
     }
-      return this;
+    return this;
   }
   
   public Result genBlankResult() {
@@ -202,7 +208,6 @@ class Game extends World {
   class GameArt {
     ILoColor colors;
     
-    WorldScene worldScene;
     int height = 200;
     
     int maxGuesses;
@@ -261,15 +266,14 @@ class Game extends World {
           this.availableColorsIMG);
       Double height = Math.ceil(screen.getHeight());
       this.height = height.intValue();
-      
-      this.worldScene = new WorldScene(gameWidth.intValue(), this.height);
     }
     
     public boolean doBigBang(Game game) {
-      return game.bigBang(this.gameWidth.intValue(), this.height, 2);
+      return game.bigBang(this.gameWidth.intValue(), this.height, 10);
     }
     
     public WorldScene produceImage() {
+      
       WorldImage screen = new AboveAlignImage(
           AlignModeX.LEFT,
           new EmptyImage(),
@@ -288,9 +292,11 @@ class Game extends World {
       /*this.worldScene = worldScene.placeImageXY(
           new RectangleImage(this.gameWidth.intValue(), this.height, OutlineMode.SOLID, this.bgColor),
           this.gameWidth.intValue() / 2, this.height / 2);*/
-      this.worldScene = worldScene.placeImageXY(screen, this.gameWidth.intValue() / 2, this.height / 2);
       
-      return this.worldScene;
+      WorldScene worldScene = new WorldScene(gameWidth.intValue(), this.height);
+      worldScene = worldScene.placeImageXY(screen, this.gameWidth.intValue() / 2, this.height / 2);
+      
+      return worldScene;
     }
     
     public void submitFalseGuess(ILoInt guess, int exact, int inexact) {
@@ -330,7 +336,7 @@ class Game extends World {
           height.intValue(),
           width.intValue(),
           this.guessSlots);
-      this.guessSlots = new AboveImage(
+      this.guessSlots = new AboveAlignImage( AlignModeX.LEFT,
           this.genColorList(new MtLoInt(), this.sequenceLength),
           this.guessSlots);
       
@@ -609,7 +615,7 @@ class ConsLoInt implements ILoInt{
     }
   }
   
-  static ConsLoInt gen(int firstNum, int...nums) {
+  static ConsLoInt gen(int firstNum, int...nums) { // purely for testing, not used in game logic
     ILoInt temp = new MtLoInt();
     for (int i = nums.length-1; i > -1; i--) {
       temp = new ConsLoInt(nums[i], temp);
@@ -783,7 +789,7 @@ class ExamplesMastermind {
   boolean testBigBang(Tester t) {
     Game game = new Game(
         ConsLoColor.gen(Color.red, Color.blue, Color.yellow), 5,
-        10, true);
+        20, true);
     return game.startGame();
   }
 }
