@@ -95,6 +95,7 @@ class Game extends World {
     
     this.rand = new Random();
     this.sequence = this.genSequence();
+    System.out.println(sequence.print());
     
     this.art = new GameArt(this);
     
@@ -113,7 +114,7 @@ class Game extends World {
     if (duplicatesAllowed) {
       ILoInt seq = new MtLoInt();
       for (int i = 0; i < this.sequenceLength; i++) {
-        seq.insert(this.rand.nextInt(this.numColors));
+        seq = seq.insert(this.rand.nextInt(this.numColors));
       }
       return seq;
     }
@@ -124,7 +125,7 @@ class Game extends World {
       do {
         val = this.rand.nextInt(this.numColors);
       } while(seen.contains(val.toString()));
-      seq.insert(val);
+      seq = seq.insert(val);
       seen += val;
     }
     return seq;
@@ -144,8 +145,9 @@ class Game extends World {
     if (this.finished) return this;
     String nums = "123456789";
     if (nums.contains(key)) {
-      if (this.guessLength < this.sequenceLength) {
-        addGuess(Integer.parseInt(key));
+      int keyInt = Integer.parseInt(key) - 1;
+      if (this.guessLength < this.sequenceLength && keyInt < this.numColors) {
+        addGuess(keyInt);
       }
     } else if (key.equals("delete" )) {
       removeGuess();
@@ -172,7 +174,7 @@ class Game extends World {
   }
   
   private void removeGuess() {
-    if (this.guessLength > 1) {
+    if (this.guessLength > 0) {
       this.guess = this.guess.remove();
       this.guessLength--;
     }
@@ -194,6 +196,7 @@ class Game extends World {
     }
     
     this.guess = new MtLoInt();
+    this.guessLength = 0;
   }
   
   class GameArt {
@@ -213,7 +216,7 @@ class Game extends World {
     WorldImage loseSequenceIMG;
     WorldImage hiddenSequence;
     
-    int dotSquareSide = 10;
+    int dotSquareSide = 26; // even
     int dotRadiusGap = 2;
     Color bgColor = new Color(150, 0, 0);
     Color outlineColor = Color.black;
@@ -232,10 +235,11 @@ class Game extends World {
           this.dotSquareSide,
           OutlineMode.SOLID,
           this.bgColor);
-      this.emptyDot = new OverlayImage(this.emptyDot, 
+      this.emptyDot = new OverlayImage( 
           new CircleImage(
-              this.dotSquareSide - this.dotRadiusGap,
-              OutlineMode.OUTLINE, this.outlineColor));
+              (this.dotSquareSide / 2) - this.dotRadiusGap,
+              OutlineMode.OUTLINE, this.outlineColor),
+          this.emptyDot);
       
       this.guessSlots = this.genInitGuessSlots();
       this.availableColorsIMG = this.genAvailableColorsIMG();
@@ -243,11 +247,12 @@ class Game extends World {
       this.loseSequenceIMG = this.genSequence(game.sequence, "Lose!");
       this.hiddenSequence = this.genHiddenSequence();
       
-      gameWidth = Math.max(
-          availableColorsIMG.getWidth(),
-          guessSlots.getWidth() + (this.dotSquareSide * 2));
-      gameWidth = Math.max(gameWidth, this.winSequenceIMG.getWidth());
-      gameWidth = Math.ceil(Math.max(gameWidth, this.loseSequenceIMG.getWidth()));      
+      this.gameWidth = Math.max(
+          this.availableColorsIMG.getWidth(),
+          this.guessSlots.getWidth() + (this.dotSquareSide * 2));
+      this.gameWidth = Math.max(this.gameWidth, this.hiddenSequence.getWidth());
+      this.gameWidth = Math.max(this.gameWidth, this.winSequenceIMG.getWidth());
+      this.gameWidth = Math.ceil(Math.max(this.gameWidth, this.loseSequenceIMG.getWidth()));      
     
       WorldImage screen = new AboveAlignImage(
           AlignModeX.LEFT,
@@ -261,13 +266,14 @@ class Game extends World {
     }
     
     public boolean doBigBang(Game game) {
-      return game.bigBang(this.gameWidth.intValue(), this.height);
+      return game.bigBang(this.gameWidth.intValue(), this.height, 2);
     }
     
     public WorldScene produceImage() {
       WorldImage screen = new AboveAlignImage(
           AlignModeX.LEFT,
-          this.hiddenSequence,2
+          new EmptyImage(),
+          this.hiddenSequence,
           this.guessSlots,
           this.availableColorsIMG);
       Double screenHeight = Math.ceil(screen.getHeight());
@@ -276,13 +282,13 @@ class Game extends World {
           AlignModeX.LEFT, AlignModeY.BOTTOM,
           screen, 0, 0,
           new RectangleImage(
-              screenHeight.intValue(), gameWidth.intValue(),
+              gameWidth.intValue(), screenHeight.intValue(),
               OutlineMode.SOLID, this.bgColor));
       
-      this.worldScene.placeImageXY(
-          new RectangleImage(this.gameWidth.intValue(), height, OutlineMode.SOLID, this.bgColor),
-          0, 0);
-      this.worldScene.placeImageXY(screen, 0, 0);
+      /*this.worldScene = worldScene.placeImageXY(
+          new RectangleImage(this.gameWidth.intValue(), this.height, OutlineMode.SOLID, this.bgColor),
+          this.gameWidth.intValue() / 2, this.height / 2);*/
+      this.worldScene = worldScene.placeImageXY(screen, this.gameWidth.intValue() / 2, this.height / 2);
       
       return this.worldScene;
     }
@@ -339,9 +345,12 @@ class Game extends World {
     
     private WorldImage genSequence(ILoInt seq, String text) {
       WorldImage seqImg = genColorList(seq, seq.calcLength());
+      
+      WorldImage textBG = new RectangleImage(this.dotSquareSide*2, this.dotSquareSide, OutlineMode.SOLID, this.bgColor);
+      
       seqImg = new BesideImage(
           seqImg,
-          new TextImage(text, 20, Color.white));
+          new OverlayImage(new TextImage(text, 20, Color.white), textBG));
       return seqImg;
     }
     
@@ -392,8 +401,8 @@ class Game extends World {
       initial = colList.fold(
           initial,
           (init, col) -> new BesideImage(
-              genFilledDot(col), 
-              init));
+              init,
+              genFilledDot(col)));
       
       return initial;
     }
@@ -415,17 +424,19 @@ class Game extends World {
     }
     
     public WorldImage genFilledDot(Color col) {
-      return new OverlayImage(this.emptyDot,
+      return new OverlayImage(
           new CircleImage(
-              this.dotSquareSide - this.dotRadiusGap,
-              OutlineMode.SOLID, col));
+              (this.dotSquareSide / 2) - this.dotRadiusGap,
+              OutlineMode.SOLID, col),
+          this.emptyDot);
     }
     
     public WorldImage genFilledDot(int index) {
-      return new OverlayImage(this.emptyDot,
+      return new OverlayImage(
           new CircleImage(
-              this.dotSquareSide - this.dotRadiusGap,
-              OutlineMode.SOLID, this.getColor(index)));
+              (this.dotSquareSide / 2) - this.dotRadiusGap,
+              OutlineMode.SOLID, this.getColor(index)),
+          this.emptyDot);
     }
     
     private Color getColor(int index) {
@@ -505,6 +516,8 @@ interface ILoInt{
   int calcLength();
   
   <T> T fold(T initial, BiFunction<T, Integer, T> folder);
+  
+  String print();
 }
 
 class MtLoInt implements ILoInt{
@@ -570,6 +583,10 @@ class MtLoInt implements ILoInt{
   
   public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
     return initial;
+  }
+  
+  public String print() {
+    return "";
   }
 }
 
@@ -689,6 +706,10 @@ class ConsLoInt implements ILoInt{
     return this.rest.fold(
         folder.apply(initial, this.first), 
         folder);
+  }
+  
+  public String print() {
+    return this.first + this.rest.print();
   }
 }
 
