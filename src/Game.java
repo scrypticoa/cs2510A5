@@ -4,6 +4,7 @@ import javalib.worldimages.*;
 import javalib.funworld.*;
 import java.awt.Color;
 
+//creates the game world
 class Game extends World {
   GameArt art;
   
