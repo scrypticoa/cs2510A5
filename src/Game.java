@@ -330,6 +330,11 @@ class Game extends World {
      * this.genFilledDot(int index) ... WorldImage
      * this.getColor(int index) ... Color
      * calcGuessLine() ... int
+     * 
+     * METHODS OF FIELDS:
+     * colors.calcLength() ... int
+     * colors.get(int index) ... Color
+     * colors.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
      */
     
     public boolean doBigBang(Game game) {
