@@ -32,8 +32,11 @@ interface ILoInt{
   // generates the minimum for the current index
   ILoInt doMins(int otherFirst, ILoInt otherRest);
   
+  //finds the length of a list
   int calcLength();
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   <T> T fold(T initial, BiFunction<T, Integer, T> folder);
   
   //puts the list into a string in order
@@ -115,6 +118,8 @@ class MtLoInt implements ILoInt{
     return 0;
   }
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
     return initial;
   }
@@ -254,6 +259,8 @@ class ConsLoInt implements ILoInt{
     return 1 + this.rest.calcLength();
   }
   
+  //modifies input value according to index value and passes it to next element,
+  //Returns input at the end of list
   public <T> T fold(T initial, BiFunction<T, Integer, T> folder) {
     return this.rest.fold(
         folder.apply(initial, this.first), 
