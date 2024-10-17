@@ -137,8 +137,4 @@ class ExamplesResult{
         // generic test
         && t.checkExpect(r2.didWin(2), true);
   }
-  
 }
-
-
-
