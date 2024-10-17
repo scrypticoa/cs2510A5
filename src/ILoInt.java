@@ -53,6 +53,8 @@ class MtLoInt implements ILoInt{
    * sum() ... int
    * mins(ILoInt list) ... ILoInt
    * doMins(int otherFirst, ILoInt otherRest) ... ILoInt
+   * fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * print() ... String
    */
   
   //add 1 to the int at position pos
@@ -155,17 +157,19 @@ class ConsLoInt implements ILoInt{
    * this.first ... int
    * this.rest ... ILoInt
    * METHODS:
-   * addAtPos(int pos) ... ILoInt
-   * insert(int num) ... ILoInt
-   * remove() ... ILoInt
-   * clone() ... ILoInt
-   * compare(ILoInt other, Game game) ... Result
-   * comparePass(ILoInt other, Game game, Result result) ... Result
-   * doCompare(ILoInt other, Game game, Result result, int num) ... Result
-   * sum() ... int
-   * mins(ILoInt list) ... ILoInt
-   * minsCompare(int otherFirst) ... int
-   * minsRHelp(ILoInt list) ... ILoint
+   * this.addAtPos(int pos) ... ILoInt
+   * this.insert(int num) ... ILoInt
+   * this.remove() ... ILoInt
+   * this.clone() ... ILoInt
+   * this.compare(ILoInt other, Game game) ... Result
+   * this.comparePass(ILoInt other, Game game, Result result) ... Result
+   * this.doCompare(ILoInt other, Game game, Result result, int num) ... Result
+   * this.sum() ... int
+   * this.mins(ILoInt list) ... ILoInt
+   * this.minsCompare(int otherFirst) ... int
+   * this.minsRHelp(ILoInt list) ... ILoint
+   * this.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * this.print() ... String
    * METHODS OF FIELDS
    * rest.addAtPos(int pos) ... ILoInt
    * rest.insert(int num) ... ILoInt
@@ -178,6 +182,8 @@ class ConsLoInt implements ILoInt{
    * rest.mins(ILoInt list) ... ILoInt
    * rest.minsCompare(int otherFirst) ... int
    * rest.minsRHelp(ILoInt list) ... ILoint
+   * rest.fold(T initial, BiFunction<T, Integer, T> folder) ... <T>
+   * rest.print() ... String
    */
   
   //adds one to the given pos
