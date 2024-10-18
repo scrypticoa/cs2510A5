@@ -362,7 +362,7 @@ class Game extends World {
      * this.genFilledDot(Color col) ... WorldImage
      * this.genFilledDot(int index) ... WorldImage
      * this.getColor(int index) ... Color
-     * calcGuessLine() ... int
+     * this.calcGuessLine() ... int
      * 
      * METHODS OF FIELDS:
      * colors.calcLength() ... int
