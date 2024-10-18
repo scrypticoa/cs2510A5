@@ -26,6 +26,7 @@ class Game extends World {
   int maxGuesses;
   boolean duplicatesAllowed;
   
+  // Constructor that accepts a random
   public Game(ILoColor gameColors, int sequenceLength,
       int attemptCount, boolean duplicatesAllowed, Random setRand) {
     this.gameColors = gameColors;
@@ -48,6 +49,7 @@ class Game extends World {
     this.art = new GameArt(this);
   }
   
+  // Constructor the generates a random on creation
   public Game(ILoColor gameColors, int sequenceLength,
       int attemptCount, boolean duplicatesAllowed) {
     this(gameColors, sequenceLength, attemptCount, duplicatesAllowed, new Random());
@@ -133,7 +135,12 @@ class Game extends World {
    * gameColors.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
    */
   
-  
+  // validates the Game constructor to ensure the values of settings don't
+  // break any rules:
+  // sequenceLength of 0 or less
+  // Possible attempts of 0 or less
+  // no colors to choose from
+  // a sequence length longer than the list of colors when duplicate colors are not allowed
   void validate() {
     if (this.sequenceLength < 1) throw new IllegalArgumentException();
     if (this.maxGuesses < 1) throw new IllegalArgumentException();
@@ -142,6 +149,8 @@ class Game extends World {
       throw new IllegalArgumentException();
   }
   
+  // used during construction, generates the game's hidden sequence, either with
+  // or without duplicates
   ILoInt genSequence() {
     if (duplicatesAllowed) {
       return genSequenceDuplicates(this.sequenceLength, new MtLoInt());
@@ -149,11 +158,14 @@ class Game extends World {
     return genSequenceNoDuplicates(this.sequenceLength, new MtLoInt(), "");
   }
   
+  // generates a hidden sequence of _length_, allowing duplicate colors
   ILoInt genSequenceDuplicates(int length, ILoInt seq) {
     if (length < 1) return seq;
     return genSequenceDuplicates(length - 1, seq.insert(this.rand.nextInt(this.numColors)));
   }
   
+  // generates a hidden sequence of _length_, disallowing duplicate colors or any
+  // color codes which seen contains
   ILoInt genSequenceNoDuplicates(int length, ILoInt seq, String seen) {
     if (length < 1) return seq;
     Integer val = this.rand.nextInt(this.numColors);
@@ -161,14 +173,22 @@ class Game extends World {
     return genSequenceNoDuplicates(length - 1, seq.insert(val), seen.concat(val.toString()));
   }
   
+  // Calls bigBang on this game, through art.doBigBang because
+  // art holds the screen height and width
+  // Starts the game
   boolean startGame() {
     return art.doBigBang(this);
   }
 
+  // Returns a render of the screen
   public WorldScene makeScene() {
     return art.produceImage();
   }
   
+  // Modifies the game state based on key input,
+  // if numeric, checks if a guess should be added
+  // if delete, removes a guess if possible
+  // if enter, submits a guess if possible
   public Game onKeyEvent(String key) {
     if (this.finished) return this;
     String nums = "123456789";
@@ -187,6 +207,8 @@ class Game extends World {
     return this;
   }
   
+  // Returns a blank sequence comparison result object,
+  // based on the number of colors in the game's sequence
   Result genBlankResult() {
     return new Result(
         0,
@@ -194,6 +216,8 @@ class Game extends World {
         new ConsLoInt(this.numColors));
   }
   
+  // adds a color code the working guess, and
+  // updates GameArt's render of guesses
   void addGuess(int color) {
     this.guess = this.guess.insert(color);
     this.guessLength++;
@@ -201,6 +225,8 @@ class Game extends World {
     this.art.updateGuessSlots(this.guess);
   }
   
+  // removes a color from the working guess if possible,
+  // and updates GameArt's render of guesses
   void removeGuess() {
     if (this.guessLength > 0) {
       this.guess = this.guess.remove();
@@ -210,6 +236,13 @@ class Game extends World {
     this.art.updateGuessSlots(this.guess);
   }
   
+  // Submits a guess:
+  // Increases the number of guesses
+  // Compares the working guess and the correct sequence
+  // if the guess is correct, relays that information to art and ends the game
+  // if the guess is incorrect and that was the last possible guess, ends the game
+  // updates arts render of guesses and of the win/loss/hidden state if necessary
+  // resets the working guess
   void submitGuess() {
     this.numGuesses++;
     
@@ -227,6 +260,7 @@ class Game extends World {
     this.guessLength = 0;
   }
   
+  // Handles game rendering
   class GameArt {
     ILoColor colors;
     
@@ -336,10 +370,12 @@ class Game extends World {
      * colors.fold(T initial, BiFunction<T, Color, T> folder) ...  <T>
      */
     
+    // starts _game_ with set width and height values
     boolean doBigBang(Game game) {
       return game.bigBang(this.width, this.height, 10);
     }
     
+    // renders the scene based on the stored scene image components
     WorldScene produceImage() {
       
       WorldImage screen = new AboveAlignImage(
@@ -366,6 +402,12 @@ class Game extends World {
       return worldScene;
     }
     
+    // When the user submits a false guess, update the guess slots, including
+    // rendering the failed guess with exact and inexact counts
+    // iterating the number of guesses and detecting if the guess slots image needs to
+    // be scrolled
+    // determines if the player has run out of guesses, if so, switches the hidden sequence
+    // to the lose sequence
     void submitFalseGuess(ILoInt guess, int exact, int inexact) {
       WorldImage guessOutput = new BesideImage(
           genColorList(guess, this.sequenceLength),
@@ -379,6 +421,11 @@ class Game extends World {
       }
     }
     
+    // When the user submits a correct guess, update the guess slots, including
+    // rendering the correct  guess with exact and inexact counts
+    // iterating the number of guesses and detecting if the guess slots image needs to
+    // be scrolled
+    // switches the hidden sequence to the win sequence
     void submitCorrectGuess(ILoInt guess, int exact, int inexact) {
       WorldImage guessOutput = new BesideImage(
           genColorList(guess, this.sequenceLength),
@@ -390,6 +437,10 @@ class Game extends World {
       this.hiddenSequence = this.winSequenceIMG;
     }
     
+    // iterates the number of guesses
+    // if the screen needs to be scrolled, scrolls the screen
+    // the screen should be scrolled when the player reaches the last
+    // line of guessSlots, but they haven't reached their last guess
     void prepareNextGuess() {      
       int prevGuessLine = this.calcGuessLine();
       this.numGuesses++;
@@ -409,6 +460,8 @@ class Game extends World {
       
     }
     
+    // Generates the image of a black rectangle which "blocks"
+    // the correct sequence at the top of the screen
     WorldImage genHiddenSequence() {
       return new RectangleImage(
           this.sequenceLength * this.dotSquareSide,
@@ -416,6 +469,8 @@ class Game extends World {
           OutlineMode.SOLID, Color.black);
     }
     
+    // Generates the revealed sequences at the top of the screen, which declare
+    // if the player won or lost
     WorldImage genResultSequence(ILoInt seq, String text) {
       WorldImage seqImg = genColorList(seq, seq.calcLength());
       
@@ -427,14 +482,21 @@ class Game extends World {
       return seqImg;
     }
     
+    // Generates the color palette at the bottom of the screen
     WorldImage genAvailableColorsIMG() {
       return genColorList(this.colors);
     }
     
+    // updates the visuals of guess slots based on a new list of color codes,
+    // which represent the current working guess
     void updateGuessSlots(ILoInt guess) {
       updateGuessImage(genColorList(guess, this.sequenceLength));
     }
     
+    // updates guess image by overlaying _image_ on top of
+    // guess slots at the current guess line.
+    // This is used to update the working guess image, and
+    // insert guess result images
     void updateGuessImage(WorldImage image) {
       this.guessSlots = new OverlayOffsetAlign(
           AlignModeX.LEFT, AlignModeY.BOTTOM,
@@ -443,17 +505,20 @@ class Game extends World {
           this.guessSlots);
     }
     
+    // generates the image of the initial grid of empty guess slots
     WorldImage genInitGuessSlots() {
       WorldImage emptySlots = genColorList(new MtLoInt(), this.sequenceLength);
       
       return doGenInitGuessSlots(this.screenGuesses, new EmptyImage(), emptySlots);
     }
     
+    // helper function for genInitGuessSlots
     WorldImage doGenInitGuessSlots(int length, WorldImage img, WorldImage slots) {
       if (length < 1) return img;
       return doGenInitGuessSlots(length - 1, new AboveImage(slots, img), slots);
     }
     
+    // generates the image of the exact and inexact matches count
     WorldImage genGuessResult(int exact, int inexact) {
       WorldImage box = new RectangleImage(
           this.dotSquareSide, 
@@ -469,6 +534,8 @@ class Game extends World {
       return new BesideImage(exactRes, inexactRes);
     }
     
+    // generates a beside image series of filled dots based on a list of colors,
+    // where colors are added from the list to image from left to right
     WorldImage genColorList(ILoColor colList) {
       WorldImage initial = new EmptyImage();
       
@@ -481,6 +548,8 @@ class Game extends World {
       return initial;
     }
     
+    // generates a beside image series of filled dots based on a list of color codes,
+    // where colors are added from the list to image from right to left
     WorldImage genColorList(ILoInt colList, int numSlots) {
       WorldImage initial = genEmptyDotsBeside(numSlots - colList.calcLength(), new EmptyImage());
       
@@ -493,11 +562,14 @@ class Game extends World {
       return initial;
     }
     
+    // generates a series of empty dots to the left of an initial image,
+    // usually this initial image is an empty image
     WorldImage genEmptyDotsBeside(int length, WorldImage img) {
       if (length < 1) return img;
       return genEmptyDotsBeside(length - 1, new BesideImage(this.emptyDot, img));
     }
     
+    // generates the image of a filled dot based on a color
     WorldImage genFilledDot(Color col) {
       return new OverlayImage(
           new CircleImage(
@@ -506,6 +578,7 @@ class Game extends World {
           this.emptyDot);
     }
     
+    // generates the image of a filled dot based on a color code
     WorldImage genFilledDot(int index) {
       return new OverlayImage(
           new CircleImage(
@@ -514,10 +587,17 @@ class Game extends World {
           this.emptyDot);
     }
     
+    // converts a color code to a color
     Color getColor(int index) {
       return this.colors.get(index);
     }
     
+    // calculates the guess line based on the number of guess, the max
+    // guesses, and the number of guess slots visible on screen
+    // guess line should start from the bottom of the screen and rise until
+    // it reaches the second to last visible guess slot
+    // it should only reach the last visible guess slot when the player
+    // is making their final guess
     int calcGuessLine() {
       if (this.numGuesses >= this.screenGuesses-1) {
         if (this.numGuesses == this.maxGuesses-1) {
