@@ -143,14 +143,18 @@ class Game extends World {
   // a sequence length longer than the list of colors when duplicate colors are not allowed
   
   void validate() {
-    if (this.sequenceLength < 1)
+    if (this.sequenceLength < 1) {
       throw new IllegalArgumentException();
-    if (this.maxGuesses < 1)
+    }
+    if (this.maxGuesses < 1) {
       throw new IllegalArgumentException();
-    if (this.numColors < 1)
+    }
+    if (this.numColors < 1) {
       throw new IllegalArgumentException();
-    if (!this.duplicatesAllowed && this.sequenceLength > this.numColors)
+    }
+    if (!this.duplicatesAllowed && this.sequenceLength > this.numColors) {
       throw new IllegalArgumentException();
+    }
   }
 
   // used during construction, generates the game's hidden sequence, either with
@@ -164,19 +168,22 @@ class Game extends World {
 
   // generates a hidden sequence of _length_, allowing duplicate colors
   ILoInt genSequenceDuplicates(int length, ILoInt seq) {
-    if (length < 1)
+    if (length < 1) {
       return seq;
+    }
     return genSequenceDuplicates(length - 1, seq.insert(this.rand.nextInt(this.numColors)));
   }
 
   // generates a hidden sequence of _length_, disallowing duplicate colors or any
   // color codes which seen contains
   ILoInt genSequenceNoDuplicates(int length, ILoInt seq, String seen) {
-    if (length < 1)
+    if (length < 1) {
       return seq;
+    }
     Integer val = this.rand.nextInt(this.numColors);
-    if (seen.contains(val.toString()))
+    if (seen.contains(val.toString())) {
       return genSequenceNoDuplicates(length, seq, seen);
+    }
     return genSequenceNoDuplicates(length - 1, seq.insert(val), seen.concat(val.toString()));
   }
 
@@ -197,8 +204,9 @@ class Game extends World {
   // if delete, removes a guess if possible
   // if enter, submits a guess if possible
   public Game onKeyEvent(String key) {
-    if (this.finished)
+    if (this.finished) {
       return this;
+    }
     String nums = "123456789";
     if (nums.contains(key)) {
       int keyInt = Integer.parseInt(key) - 1;
@@ -260,8 +268,9 @@ class Game extends World {
       art.submitCorrectGuess(this.guess, this.sequenceLength, 0);
     }
     else {
-      if (this.numGuesses == this.maxGuesses)
+      if (this.numGuesses == this.maxGuesses) {
         finished = true;
+      }
       art.submitFalseGuess(guess, res.exact, res.calcInexactCount());
     }
 
@@ -441,8 +450,9 @@ class Game extends World {
       int prevGuessLine = this.calcGuessLine();
       this.numGuesses++;
 
-      if (this.calcGuessLine() != prevGuessLine)
+      if (this.calcGuessLine() != prevGuessLine) {
         return;
+      }
 
       Double height = Math.ceil(this.guessSlots.getHeight()) - this.dotSquareSide;
       Double width = Math.ceil(this.guessSlots.getWidth());
@@ -501,8 +511,9 @@ class Game extends World {
 
     // helper function for genInitGuessSlots
     WorldImage doGenInitGuessSlots(int length, WorldImage img, WorldImage slots) {
-      if (length < 1)
+      if (length < 1) {
         return img;
+      }
       return doGenInitGuessSlots(length - 1, new AboveImage(slots, img), slots);
     }
 
@@ -541,8 +552,9 @@ class Game extends World {
     // generates a series of empty dots to the left of an initial image,
     // usually this initial image is an empty image
     WorldImage genEmptyDotsBeside(int length, WorldImage img) {
-      if (length < 1)
+      if (length < 1) {
         return img;
+      }
       return genEmptyDotsBeside(length - 1, new BesideImage(this.emptyDot, img));
     }
 
@@ -575,8 +587,9 @@ class Game extends World {
         if (this.numGuesses == this.maxGuesses - 1) {
           return this.screenGuesses - 1;
         }
-        else
+        else {
           return this.screenGuesses - 2;
+        }
       }
       return this.numGuesses;
     }

@@ -147,9 +147,10 @@ class ConsLoInt implements ILoInt {
   }
 
   ConsLoInt(int size) throws IllegalArgumentException {
-    if (size < 1)
+    if (size < 1) {
       throw new IllegalArgumentException(
           "ConsLoInt zero constructor cannot accpet size less than one");
+    }
     first = 0;
     if (size > 1) {
       rest = new ConsLoInt(size - 1);

@@ -1,6 +1,7 @@
 import tester.*;
 import java.util.function.*;
 import java.awt.Color;
+
 //A list of Colors
 interface ILoColor {
   
@@ -46,9 +47,10 @@ class ConsLoColor implements ILoColor {
     this.rest = rest;
   }
   
-  static ConsLoColor gen(Color firstColor, Color...cols) { // purely for testing, not used in game logic
+  // purely for testing, not used in game logic
+  static ConsLoColor gen(Color firstColor, Color...cols) { 
     ILoColor temp = new MtLoColor();
-    for (int i = cols.length-1; i > -1; i--) {
+    for (int i = cols.length - 1; i > -1; i--) {
       temp = new ConsLoColor(cols[i], temp);
     }
     return new ConsLoColor(firstColor, temp);
@@ -80,7 +82,7 @@ class ConsLoColor implements ILoColor {
     if (index == 0) {
       return this.first;
     }
-    return this.rest.get(index-1);
+    return this.rest.get(index - 1);
   }
   
   public <T> T fold(T initial, BiFunction<T, Color, T> folder) {
