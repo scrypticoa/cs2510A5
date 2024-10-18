@@ -39,21 +39,18 @@ class Result {
    */
   
   // adds one to exact
-  public int addExact() {
-    exact++;
-    return exact;
+  public Result addExact() {
+    return new Result(exact + 1, this.inexactCount1.clone(), this.inexactCount2.clone());
   }
 
   // adds one at the position of pos on InexactCount1
-  public ILoInt addInexact1(int pos) {
-    this.inexactCount1 = this.inexactCount1.addAtPos(pos);
-    return this.inexactCount1;
+  public Result addInexact1(int pos) {
+    return new Result(this.exact, this.inexactCount1.addAtPos(pos), this.inexactCount2.clone());
   }
 
   // adds one at the position of pos on InexactCount2
-  public ILoInt addInexact2(int pos) {
-    this.inexactCount2 = this.inexactCount2.addAtPos(pos);
-    return this.inexactCount2;
+  public Result addInexact2(int pos) {
+    return new Result(this.exact, this.inexactCount1.clone(), this.inexactCount2.addAtPos(pos));
   }
 
   // calculates the minimum of the guess vs key and then sums the min list to find
@@ -74,7 +71,7 @@ class ExamplesResult {
   ILoInt mt = new MtLoInt();
   ILoInt l1 = new ConsLoInt(3);
   ILoInt l2 = new ConsLoInt(1, new ConsLoInt(0, new ConsLoInt(0, mt)));
-  ILoInt l3 = new ConsLoInt(0, new ConsLoInt(1, new ConsLoInt(0, mt)));
+  ILoInt l3 = new ConsLoInt(0, new ConsLoInt(0, new ConsLoInt(1, mt)));
   Result r1 = new Result(0, l1, l1);
   Result r2 = new Result(2, mt, mt);
 
@@ -95,9 +92,9 @@ class ExamplesResult {
   // tests for addInexact1
   public boolean testAddInexact1(Tester t) {
     // tests a generic Result at pos 0
-    return t.checkExpect(r1.addInexact1(0), new Result(1, l2, l1))
+    return t.checkExpect(r1.addInexact1(0), new Result(0, l2, l1))
         // test a genric Result as pos >0
-        && t.checkExpect(r1.addInexact1(2), new Result(1, l3, l1))
+        && t.checkExpect(r1.addInexact1(2), new Result(0, l3, l1))
         // tests with mts
         && t.checkException(new IndexOutOfBoundsException(), r2, "addInexact1", 0);
   }
@@ -105,9 +102,9 @@ class ExamplesResult {
   // tests for addInexact2
   public boolean testAddInexact2(Tester t) {
     // tests a generic Result at pos 0
-    return t.checkExpect(r1.addInexact2(0), new Result(1, l1, l2))
+    return t.checkExpect(r1.addInexact2(0), new Result(0, l1, l2))
         // test a genric Result as pos >0
-        && t.checkExpect(r1.addInexact2(2), new Result(1, l1, l3))
+        && t.checkExpect(r1.addInexact2(2), new Result(0, l1, l3))
         // tests with mts
         && t.checkException(new IndexOutOfBoundsException(), r2, "addInexact2", 0);
   }

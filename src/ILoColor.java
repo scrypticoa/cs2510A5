@@ -102,7 +102,10 @@ class ExamplesILoColor {
   public boolean testCalcLength(Tester t) {
     boolean out = true;
     
+    // test generic list
     out |= t.checkExpect(example.calcLength(), 3);
+    
+    // test empty list
     out |= t.checkExpect(empty.calcLength(), 0);
     
     return out;
@@ -112,12 +115,12 @@ class ExamplesILoColor {
   public boolean testFold(Tester t) {
     boolean out = true;
     
-    String init = "";
+    ILoColor init = new MtLoColor();
     
     out |= t.checkExpect(example.fold(init,
-        (s, col) -> {
-          return s += col.toString();
-        }), "redblueblack");
+        (ls, col) -> {
+          return new ConsLoColor(col, ls);
+        }), ConsLoColor.gen(Color.black, Color.blue, Color.red));
     
     return out;
   }
@@ -125,7 +128,10 @@ class ExamplesILoColor {
   public boolean testGet(Tester t) {
     boolean out = true;
     
+    // generic valid get
     out |= t.checkExpect(example.get(1), Color.blue);
+    
+    // out of bounds get
     out |= t.checkException(new IndexOutOfBoundsException(), example, "get", 5);
     
     return out;

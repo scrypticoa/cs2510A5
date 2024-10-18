@@ -227,11 +227,11 @@ class ConsLoInt implements ILoInt {
   // compares two list to find exact and inexact matches
   public Result doCompare(ILoInt other, Game game, Result result, int num) {
     if (num == this.first) {
-      result.addExact();
+      result = result.addExact();
     }
     else {
-      result.addInexact1(num);
-      result.addInexact2(this.first);
+      result = result.addInexact1(num);
+      result = result.addInexact2(this.first);
     }
 
     return other.comparePass(this.rest, game, result);
