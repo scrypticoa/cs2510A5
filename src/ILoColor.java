@@ -89,3 +89,29 @@ class ConsLoColor implements ILoColor {
         folder);
   }
 }
+
+// tests for ILoColors
+class ExamplesILoColor() {
+  
+  
+  
+  //tests clacLength
+  public boolean testCalcLength() {
+    
+  }
+  
+//tests get
+  public boolean testCalcLength() {
+    
+  }
+  
+//tests Fold
+  public boolean testFold() {
+    
+  }
+  
+}
+
+
+
+
