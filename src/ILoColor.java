@@ -91,25 +91,43 @@ class ConsLoColor implements ILoColor {
 }
 
 // tests for ILoColors
-class ExamplesILoColor() {
+class ExamplesILoColor {
   
+  ILoColor example = ConsLoColor.gen(Color.red, Color.blue, Color.black);
+  ILoColor empty = new MtLoColor();
   
-  
-  //tests clacLength
-  public boolean testCalcLength() {
+  //tests calcLength
+  public boolean testCalcLength(Tester t) {
+    boolean out = true;
     
+    out |= t.checkExpect(example.calcLength(), 3);
+    out |= t.checkExpect(empty.calcLength(), 0);
+    
+    return out;
   }
   
-//tests get
-  public boolean testCalcLength() {
+  //tests Fold
+  public boolean testFold(Tester t) {
+    boolean out = true;
     
+    String init = "";
+    
+    out |= t.checkExpect(example.fold(init,
+        (s, col) -> {
+          return s += col.toString();
+        }), "redblueblack");
+    
+    return out;
   }
   
-//tests Fold
-  public boolean testFold() {
+  public boolean testGet(Tester t) {
+    boolean out = true;
     
+    out |= t.checkExpect(example.get(1), Color.blue);
+    out |= t.checkException(new IndexOutOfBoundsException(), example, "get", 5);
+    
+    return out;
   }
-  
 }
 
 
