@@ -92,24 +92,20 @@ class ConsLoColor implements ILoColor {
 
 // tests for ILoColors
 class ExamplesILoColor() {
-  
-  
-  
   //tests clacLength
   public boolean testCalcLength() {
     
   }
   
-//tests get
-  public boolean testCalcLength() {
+  //tests get
+  public boolean testGet() {
     
   }
   
-//tests Fold
+  //tests Fold
   public boolean testFold() {
     
   }
-  
 }
 
 
